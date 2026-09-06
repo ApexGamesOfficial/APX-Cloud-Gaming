@@ -8,33 +8,32 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <meta name="theme-color" content="#02070d">
+    <meta name="theme-color" content="#03070c">
 
     <title>APX | Cloud Gaming by Apex Games</title>
 
-    <link rel="stylesheet" href="style.css?v=1">
+    <link rel="stylesheet" href="style.css?v=2">
 </head>
 
-<body class="booting">
+<body>
 
     <!-- =====================================================
-         STARTUP
+         APX BOOT
     ====================================================== -->
 
     <section
         class="boot-screen"
         id="bootScreen"
-        aria-label="Starting APX"
     >
-        <div class="boot-glow"></div>
+        <div class="boot-light"></div>
 
-        <div class="boot-brand">
-            <div class="apx-mark">APX</div>
-
-            <p>
-                CLOUD GAMING
-            </p>
+        <div class="boot-logo">
+            APX
         </div>
+
+        <span class="boot-subtitle">
+            CLOUD GAMING BY APEX GAMES
+        </span>
 
         <div class="boot-status">
             <span id="bootStatus">
@@ -42,73 +41,115 @@
             </span>
 
             <div class="boot-dots">
-                <span></span>
-                <span></span>
-                <span></span>
+                <i></i>
+                <i></i>
+                <i></i>
             </div>
         </div>
     </section>
 
 
     <!-- =====================================================
-         APP
+         APX SYSTEM
     ====================================================== -->
 
-    <main class="apx-shell" id="apxShell">
+    <main
+        class="apx-system"
+        id="apxSystem"
+    >
 
         <!-- =================================================
-             TOP BAR
+             DYNAMIC GAME BACKGROUND
         ================================================== -->
 
-        <header class="apx-topbar">
-
-            <button
-                class="brand-button"
-                id="homeButton"
-                type="button"
-                aria-label="APX Home"
-            >
-                <span class="brand-mark">APX</span>
-
-                <span class="brand-subtitle">
-                    CLOUD
-                </span>
-            </button>
+        <div
+            class="game-background"
+            id="gameBackground"
+        >
+            <div class="background-grid"></div>
+            <div class="background-orb"></div>
+            <div class="background-vignette"></div>
+            <div class="background-bottom-fade"></div>
+        </div>
 
 
-            <nav class="top-navigation">
+        <!-- =================================================
+             TOP SYSTEM BAR
+        ================================================== -->
+
+        <header class="system-bar">
+
+            <div class="system-left">
 
                 <button
-                    class="nav-button active"
+                    class="apx-brand"
+                    id="apxHomeButton"
                     type="button"
-                    data-view="home"
+                    aria-label="APX Home"
                 >
-                    Home
+                    APX
+                </button>
+
+                <span class="system-divider"></span>
+
+                <span class="cloud-label">
+                    CLOUD GAMING
+                </span>
+
+            </div>
+
+
+            <div class="system-center">
+
+                <button
+                    class="system-nav active"
+                    type="button"
+                    data-section="games"
+                >
+                    Games
                 </button>
 
                 <button
-                    class="nav-button"
+                    class="system-nav"
                     type="button"
-                    data-view="library"
+                    data-section="library"
                 >
                     Library
                 </button>
 
                 <button
-                    class="nav-button"
+                    class="system-nav"
                     type="button"
-                    data-view="recent"
+                    data-section="social"
                 >
-                    Recent
+                    Social
                 </button>
 
-            </nav>
+            </div>
 
 
-            <div class="top-actions">
+            <div class="system-right">
 
                 <button
-                    class="icon-button"
+                    class="ai-top-button"
+                    id="aiTopButton"
+                    type="button"
+                    aria-label="Open APX AI"
+                >
+                    <span class="ai-spark"></span>
+                    APX AI
+                </button>
+
+                <div
+                    class="network-status"
+                    title="APX Cloud status"
+                >
+                    <span></span>
+                    Ready
+                </div>
+
+                <button
+                    class="system-icon"
                     id="searchButton"
                     type="button"
                     aria-label="Search"
@@ -117,18 +158,18 @@
                 </button>
 
                 <button
-                    class="connection-pill"
-                    id="connectionButton"
+                    class="system-icon"
+                    id="settingsButton"
                     type="button"
+                    aria-label="Settings"
                 >
-                    <span class="connection-dot"></span>
-
-                    Cloud Ready
+                    ⚙
                 </button>
 
                 <button
                     class="account-button"
                     type="button"
+                    aria-label="Account"
                 >
                     <img
                         src="Default Apex Games Profile Picture.png"
@@ -136,10 +177,13 @@
                         onerror="this.style.display='none'"
                     >
 
-                    <span>
-                        Gamer0011
-                    </span>
+                    <span>Gamer0011</span>
                 </button>
+
+                <div class="system-clock">
+                    <strong id="systemTime">--:--</strong>
+                    <span id="systemDate">---</span>
+                </div>
 
             </div>
 
@@ -147,7 +191,321 @@
 
 
         <!-- =================================================
-             SEARCH
+             MAIN GAME EXPERIENCE
+        ================================================== -->
+
+        <section
+            class="games-screen active-screen"
+            id="gamesScreen"
+        >
+
+            <!-- Selected game information -->
+
+            <section class="selected-game-info">
+
+                <span
+                    class="selected-eyebrow"
+                    id="selectedEyebrow"
+                >
+                    APX CLOUD READY
+                </span>
+
+                <h1 id="selectedTitle">
+                    Apex Demo
+                </h1>
+
+                <p id="selectedDescription">
+                    Enter the Apex Games ecosystem through the cloud.
+                </p>
+
+                <div class="selected-meta">
+
+                    <span id="selectedGenre">
+                        Action
+                    </span>
+
+                    <i></i>
+
+                    <span id="selectedDeveloper">
+                        Apex Games
+                    </span>
+
+                    <i></i>
+
+                    <span>
+                        APX Ready
+                    </span>
+
+                </div>
+
+
+                <div class="selected-actions">
+
+                    <button
+                        class="primary-play"
+                        id="playButton"
+                        type="button"
+                    >
+                        <span>▶</span>
+                        Play on APX
+                    </button>
+
+                    <button
+                        class="secondary-action"
+                        id="detailsButton"
+                        type="button"
+                    >
+                        Details
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 GAME CAROUSEL
+            ================================================== -->
+
+            <section class="carousel-area">
+
+                <div class="carousel-heading">
+
+                    <div>
+                        <span>YOUR LIBRARY</span>
+                        <strong>Choose a game</strong>
+                    </div>
+
+                    <div class="carousel-counter">
+                        <span id="carouselCurrent">01</span>
+                        <i></i>
+                        <span id="carouselTotal">02</span>
+                    </div>
+
+                </div>
+
+
+                <div class="carousel-window">
+
+                    <button
+                        class="carousel-arrow left"
+                        id="previousGame"
+                        type="button"
+                        aria-label="Previous game"
+                    >
+                        ‹
+                    </button>
+
+
+                    <div
+                        class="game-carousel"
+                        id="gameCarousel"
+                    ></div>
+
+
+                    <button
+                        class="carousel-arrow right"
+                        id="nextGame"
+                        type="button"
+                        aria-label="Next game"
+                    >
+                        ›
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 BOTTOM SYSTEM HINTS
+            ================================================== -->
+
+            <footer class="system-hints">
+
+                <div>
+                    <span class="hint-key">←</span>
+                    <span class="hint-key">→</span>
+                    <span>Select Game</span>
+                </div>
+
+                <div>
+                    <span class="hint-key">Enter</span>
+                    <span>Open</span>
+                </div>
+
+                <div>
+                    <span class="hint-key">A</span>
+                    <span>APX AI</span>
+                </div>
+
+            </footer>
+
+        </section>
+
+
+        <!-- =================================================
+             LIBRARY SCREEN
+        ================================================== -->
+
+        <section
+            class="secondary-screen"
+            id="libraryScreen"
+        >
+
+            <div class="screen-heading">
+
+                <span>APEX GAMES LIBRARY</span>
+
+                <h1>
+                    Your Games
+                </h1>
+
+                <p>
+                    Games from your Apex Games Library that support
+                    APX appear here automatically.
+                </p>
+
+            </div>
+
+
+            <div
+                class="library-grid"
+                id="libraryGrid"
+            ></div>
+
+        </section>
+
+
+        <!-- =================================================
+             SOCIAL SCREEN
+        ================================================== -->
+
+        <section
+            class="secondary-screen"
+            id="socialScreen"
+        >
+
+            <div class="screen-heading">
+
+                <span>APX SOCIAL</span>
+
+                <h1>
+                    Friends
+                </h1>
+
+                <p>
+                    See who's online and what your friends are playing.
+                </p>
+
+            </div>
+
+
+            <div class="empty-system-card">
+
+                <span class="empty-icon">
+                    ◉
+                </span>
+
+                <h2>
+                    Social integration coming later
+                </h2>
+
+                <p>
+                    APX will eventually connect to your Apex Games
+                    friends and presence system.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             DETAILS OVERLAY
+        ================================================== -->
+
+        <section
+            class="details-overlay"
+            id="detailsOverlay"
+            hidden
+        >
+
+            <div class="overlay-backdrop"></div>
+
+
+            <article class="details-card">
+
+                <button
+                    class="overlay-close"
+                    id="closeDetails"
+                    type="button"
+                >
+                    ✕
+                </button>
+
+
+                <span class="details-label">
+                    APX CLOUD GAME
+                </span>
+
+                <h2 id="detailsTitle">
+                    Apex Demo
+                </h2>
+
+                <p id="detailsDescription">
+                    Description
+                </p>
+
+
+                <div class="details-stats">
+
+                    <div>
+                        <span>Developer</span>
+                        <strong id="detailsDeveloper">
+                            Apex Games
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Genre</span>
+                        <strong id="detailsGenre">
+                            Action
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Cloud Status</span>
+                        <strong>
+                            APX Ready
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Controls</span>
+                        <strong>
+                            Keyboard · Controller
+                        </strong>
+                    </div>
+
+                </div>
+
+
+                <button
+                    class="primary-play full-width"
+                    id="detailsPlayButton"
+                    type="button"
+                >
+                    ▶ Play on APX
+                </button>
+
+            </article>
+
+        </section>
+
+
+        <!-- =================================================
+             SEARCH OVERLAY
         ================================================== -->
 
         <section
@@ -155,16 +513,14 @@
             id="searchOverlay"
             hidden
         >
-            <div class="search-panel">
 
-                <div class="search-heading">
+            <div class="search-container">
+
+                <div class="search-title-row">
 
                     <div>
-                        <span>APX</span>
-
-                        <h2>
-                            Search your cloud library
-                        </h2>
+                        <span>APX SEARCH</span>
+                        <h2>Find a game</h2>
                     </div>
 
                     <button
@@ -180,7 +536,7 @@
                 <input
                     id="searchInput"
                     type="search"
-                    placeholder="Search games..."
+                    placeholder="Search your Apex Games Library..."
                     autocomplete="off"
                 >
 
@@ -191,328 +547,114 @@
                 ></div>
 
             </div>
+
         </section>
 
 
         <!-- =================================================
-             HOME VIEW
+             APX AI
         ================================================== -->
 
         <section
-            class="view active"
-            id="homeView"
+            class="ai-overlay"
+            id="aiOverlay"
+            hidden
         >
 
-            <!-- HERO -->
-
-            <section
-                class="hero"
-                id="hero"
-            >
-
-                <div class="hero-background"></div>
-
-                <div class="hero-vignette"></div>
+            <div class="ai-backdrop"></div>
 
 
-                <div class="hero-content">
+            <div class="ai-interface">
 
-                    <span class="hero-eyebrow">
-                        READY ON APX
-                    </span>
-
-                    <h1 id="heroTitle">
-                        Apex Demo
-                    </h1>
-
-                    <p id="heroDescription">
-                        Enter the Apex Games ecosystem through the cloud.
-                    </p>
-
-                    <div class="hero-meta">
-
-                        <span id="heroGenre">
-                            Action
-                        </span>
-
-                        <span>•</span>
-
-                        <span>
-                            Cloud Ready
-                        </span>
-
-                        <span>•</span>
-
-                        <span>
-                            Windows
-                        </span>
-
-                    </div>
-
-
-                    <div class="hero-actions">
-
-                        <button
-                            class="play-button"
-                            id="heroPlayButton"
-                            type="button"
-                        >
-                            <span class="play-icon">
-                                ▶
-                            </span>
-
-                            Play on APX
-                        </button>
-
-
-                        <button
-                            class="details-button"
-                            id="heroDetailsButton"
-                            type="button"
-                        >
-                            Game Details
-                        </button>
-
-                    </div>
-
-                </div>
-
-
-                <div class="hero-indicator">
-
-                    <span class="indicator-label">
-                        SELECTED
-                    </span>
-
-                    <strong id="heroPosition">
-                        01 / 02
-                    </strong>
-
-                </div>
-
-            </section>
-
-
-            <!-- =================================================
-                 CONTINUE PLAYING
-            ================================================== -->
-
-            <section class="content-row">
-
-                <div class="section-heading">
-
-                    <div>
-
-                        <span>
-                            YOUR APX
-                        </span>
-
-                        <h2>
-                            Continue Playing
-                        </h2>
-
-                    </div>
-
-                </div>
+                <button
+                    class="ai-close"
+                    id="closeAI"
+                    type="button"
+                >
+                    ✕
+                </button>
 
 
                 <div
-                    class="game-carousel"
-                    id="continueGames"
-                ></div>
+                    class="ai-orb"
+                    id="aiOrb"
+                >
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
 
-            </section>
+
+                <span class="ai-label">
+                    APX AI
+                </span>
+
+                <h2 id="aiHeading">
+                    What do you want to play?
+                </h2>
+
+                <p
+                    class="ai-response"
+                    id="aiResponse"
+                >
+                    Type a command below.
+                </p>
 
 
-            <!-- =================================================
-                 CLOUD LIBRARY
-            ================================================== -->
+                <form
+                    class="ai-command-box"
+                    id="aiForm"
+                >
+                    <input
+                        id="aiInput"
+                        type="text"
+                        placeholder='Try "Open Apex Demo"'
+                        autocomplete="off"
+                    >
 
-            <section class="content-row">
+                    <button type="submit">
+                        Send
+                    </button>
+                </form>
 
-                <div class="section-heading">
 
-                    <div>
-
-                        <span>
-                            APEX GAMES LIBRARY
-                        </span>
-
-                        <h2>
-                            Ready in the Cloud
-                        </h2>
-
-                    </div>
+                <div class="ai-examples">
 
                     <button
-                        class="see-all-button"
                         type="button"
-                        data-open-library
+                        data-ai-command="Open Apex Demo"
                     >
-                        View Library
+                        Open Apex Demo
+                    </button>
+
+                    <button
+                        type="button"
+                        data-ai-command="Open Project Unknown"
+                    >
+                        Open Project Unknown
+                    </button>
+
+                    <button
+                        type="button"
+                        data-ai-command="Go to my library"
+                    >
+                        Go to my Library
                     </button>
 
                 </div>
 
 
-                <div
-                    class="game-carousel"
-                    id="cloudGames"
-                ></div>
+                <span class="ai-prototype-note">
+                    APX AI v0.1 · Command prototype
+                </span>
 
-            </section>
+            </div>
 
         </section>
 
 
         <!-- =================================================
-             LIBRARY VIEW
-        ================================================== -->
-
-        <section
-            class="view library-view"
-            id="libraryView"
-        >
-
-            <div class="view-heading">
-
-                <span>
-                    APEX GAMES
-                </span>
-
-                <h1>
-                    Cloud Library
-                </h1>
-
-                <p>
-                    Supported games from your Apex Games Library
-                    automatically appear here.
-                </p>
-
-            </div>
-
-
-            <div
-                class="library-grid"
-                id="libraryGrid"
-            ></div>
-
-        </section>
-
-
-        <!-- =================================================
-             RECENT VIEW
-        ================================================== -->
-
-        <section
-            class="view recent-view"
-            id="recentView"
-        >
-
-            <div class="view-heading">
-
-                <span>
-                    APX
-                </span>
-
-                <h1>
-                    Recent Sessions
-                </h1>
-
-                <p>
-                    Quickly return to games you've recently played
-                    through APX.
-                </p>
-
-            </div>
-
-
-            <div
-                class="recent-list"
-                id="recentList"
-            ></div>
-
-        </section>
-
-
-        <!-- =================================================
-             GAME DETAILS PANEL
-        ================================================== -->
-
-        <aside
-            class="details-panel"
-            id="detailsPanel"
-            aria-hidden="true"
-        >
-
-            <button
-                class="details-close"
-                id="detailsClose"
-                type="button"
-            >
-                ✕
-            </button>
-
-
-            <div class="details-content">
-
-                <span class="details-eyebrow">
-                    APX CLOUD GAME
-                </span>
-
-                <h2 id="detailsTitle">
-                    Apex Demo
-                </h2>
-
-                <p id="detailsDescription">
-                    Game description.
-                </p>
-
-
-                <div class="details-info">
-
-                    <div>
-                        <span>Developer</span>
-
-                        <strong id="detailsDeveloper">
-                            Apex Games
-                        </strong>
-                    </div>
-
-                    <div>
-                        <span>Genre</span>
-
-                        <strong id="detailsGenre">
-                            Action
-                        </strong>
-                    </div>
-
-                    <div>
-                        <span>Cloud</span>
-
-                        <strong>
-                            APX Ready
-                        </strong>
-                    </div>
-
-                </div>
-
-
-                <button
-                    class="play-button details-play"
-                    id="detailsPlayButton"
-                    type="button"
-                >
-                    ▶ Play on APX
-                </button>
-
-            </div>
-
-        </aside>
-
-
-        <!-- =================================================
-             SESSION LAUNCH
+             CLOUD SESSION
         ================================================== -->
 
         <section
@@ -521,38 +663,38 @@
             hidden
         >
 
-            <div class="session-background"></div>
+            <div class="session-glow"></div>
 
 
-            <div class="session-card">
+            <div class="session-interface">
 
-                <span class="session-label">
+                <span>
                     APX CLOUD SESSION
                 </span>
 
-                <h2 id="sessionTitle">
+                <h1 id="sessionGameTitle">
                     Apex Demo
-                </h2>
+                </h1>
+
 
                 <div
-                    class="session-spinner"
-                    id="sessionSpinner"
-                ></div>
-
-                <strong
-                    class="session-status"
-                    id="sessionStatus"
+                    class="session-loader"
+                    id="sessionLoader"
                 >
+                    <i></i>
+                </div>
+
+
+                <strong id="sessionStatus">
                     Preparing your session...
                 </strong>
 
-                <p id="sessionDescription">
-                    APX is checking your cloud gaming session.
+                <p id="sessionMessage">
+                    Connecting to APX.
                 </p>
 
 
                 <button
-                    class="cancel-session"
                     id="cancelSession"
                     type="button"
                 >
@@ -565,17 +707,54 @@
 
 
         <!-- =================================================
-             PROTOTYPE NOTICE
+             SETTINGS
         ================================================== -->
 
-        <div class="prototype-badge">
-            APX v0.1 UI Prototype
-        </div>
+        <section
+            class="simple-overlay"
+            id="settingsOverlay"
+            hidden
+        >
+
+            <div class="simple-panel">
+
+                <button
+                    class="overlay-close"
+                    id="closeSettings"
+                    type="button"
+                >
+                    ✕
+                </button>
+
+                <span>
+                    APX SYSTEM
+                </span>
+
+                <h2>
+                    Settings
+                </h2>
+
+                <p>
+                    Full APX settings will be added in a future version.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             VERSION
+        ================================================== -->
+
+        <span class="version-label">
+            APX v0.2
+        </span>
 
     </main>
 
 
-    <script src="script.js?v=1"></script>
+    <script src="script.js?v=2"></script>
 
 </body>
 </html>
