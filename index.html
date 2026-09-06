@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta name="theme-color" content="#02070d">
+
+    <title>APX | Cloud Gaming by Apex Games</title>
+
+    <link rel="stylesheet" href="style.css?v=1">
+</head>
+
+<body class="booting">
+
+    <!-- =====================================================
+         STARTUP
+    ====================================================== -->
+
+    <section
+        class="boot-screen"
+        id="bootScreen"
+        aria-label="Starting APX"
+    >
+        <div class="boot-glow"></div>
+
+        <div class="boot-brand">
+            <div class="apx-mark">APX</div>
+
+            <p>
+                CLOUD GAMING
+            </p>
+        </div>
+
+        <div class="boot-status">
+            <span id="bootStatus">
+                Starting APX
+            </span>
+
+            <div class="boot-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- =====================================================
+         APP
+    ====================================================== -->
+
+    <main class="apx-shell" id="apxShell">
+
+        <!-- =================================================
+             TOP BAR
+        ================================================== -->
+
+        <header class="apx-topbar">
+
+            <button
+                class="brand-button"
+                id="homeButton"
+                type="button"
+                aria-label="APX Home"
+            >
+                <span class="brand-mark">APX</span>
+
+                <span class="brand-subtitle">
+                    CLOUD
+                </span>
+            </button>
+
+
+            <nav class="top-navigation">
+
+                <button
+                    class="nav-button active"
+                    type="button"
+                    data-view="home"
+                >
+                    Home
+                </button>
+
+                <button
+                    class="nav-button"
+                    type="button"
+                    data-view="library"
+                >
+                    Library
+                </button>
+
+                <button
+                    class="nav-button"
+                    type="button"
+                    data-view="recent"
+                >
+                    Recent
+                </button>
+
+            </nav>
+
+
+            <div class="top-actions">
+
+                <button
+                    class="icon-button"
+                    id="searchButton"
+                    type="button"
+                    aria-label="Search"
+                >
+                    ⌕
+                </button>
+
+                <button
+                    class="connection-pill"
+                    id="connectionButton"
+                    type="button"
+                >
+                    <span class="connection-dot"></span>
+
+                    Cloud Ready
+                </button>
+
+                <button
+                    class="account-button"
+                    type="button"
+                >
+                    <img
+                        src="Default Apex Games Profile Picture.png"
+                        alt=""
+                        onerror="this.style.display='none'"
+                    >
+
+                    <span>
+                        Gamer0011
+                    </span>
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <!-- =================================================
+             SEARCH
+        ================================================== -->
+
+        <section
+            class="search-overlay"
+            id="searchOverlay"
+            hidden
+        >
+            <div class="search-panel">
+
+                <div class="search-heading">
+
+                    <div>
+                        <span>APX</span>
+
+                        <h2>
+                            Search your cloud library
+                        </h2>
+                    </div>
+
+                    <button
+                        id="closeSearch"
+                        type="button"
+                    >
+                        ✕
+                    </button>
+
+                </div>
+
+
+                <input
+                    id="searchInput"
+                    type="search"
+                    placeholder="Search games..."
+                    autocomplete="off"
+                >
+
+
+                <div
+                    class="search-results"
+                    id="searchResults"
+                ></div>
+
+            </div>
+        </section>
+
+
+        <!-- =================================================
+             HOME VIEW
+        ================================================== -->
+
+        <section
+            class="view active"
+            id="homeView"
+        >
+
+            <!-- HERO -->
+
+            <section
+                class="hero"
+                id="hero"
+            >
+
+                <div class="hero-background"></div>
+
+                <div class="hero-vignette"></div>
+
+
+                <div class="hero-content">
+
+                    <span class="hero-eyebrow">
+                        READY ON APX
+                    </span>
+
+                    <h1 id="heroTitle">
+                        Apex Demo
+                    </h1>
+
+                    <p id="heroDescription">
+                        Enter the Apex Games ecosystem through the cloud.
+                    </p>
+
+                    <div class="hero-meta">
+
+                        <span id="heroGenre">
+                            Action
+                        </span>
+
+                        <span>•</span>
+
+                        <span>
+                            Cloud Ready
+                        </span>
+
+                        <span>•</span>
+
+                        <span>
+                            Windows
+                        </span>
+
+                    </div>
+
+
+                    <div class="hero-actions">
+
+                        <button
+                            class="play-button"
+                            id="heroPlayButton"
+                            type="button"
+                        >
+                            <span class="play-icon">
+                                ▶
+                            </span>
+
+                            Play on APX
+                        </button>
+
+
+                        <button
+                            class="details-button"
+                            id="heroDetailsButton"
+                            type="button"
+                        >
+                            Game Details
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="hero-indicator">
+
+                    <span class="indicator-label">
+                        SELECTED
+                    </span>
+
+                    <strong id="heroPosition">
+                        01 / 02
+                    </strong>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 CONTINUE PLAYING
+            ================================================== -->
+
+            <section class="content-row">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <span>
+                            YOUR APX
+                        </span>
+
+                        <h2>
+                            Continue Playing
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="game-carousel"
+                    id="continueGames"
+                ></div>
+
+            </section>
+
+
+            <!-- =================================================
+                 CLOUD LIBRARY
+            ================================================== -->
+
+            <section class="content-row">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <span>
+                            APEX GAMES LIBRARY
+                        </span>
+
+                        <h2>
+                            Ready in the Cloud
+                        </h2>
+
+                    </div>
+
+                    <button
+                        class="see-all-button"
+                        type="button"
+                        data-open-library
+                    >
+                        View Library
+                    </button>
+
+                </div>
+
+
+                <div
+                    class="game-carousel"
+                    id="cloudGames"
+                ></div>
+
+            </section>
+
+        </section>
+
+
+        <!-- =================================================
+             LIBRARY VIEW
+        ================================================== -->
+
+        <section
+            class="view library-view"
+            id="libraryView"
+        >
+
+            <div class="view-heading">
+
+                <span>
+                    APEX GAMES
+                </span>
+
+                <h1>
+                    Cloud Library
+                </h1>
+
+                <p>
+                    Supported games from your Apex Games Library
+                    automatically appear here.
+                </p>
+
+            </div>
+
+
+            <div
+                class="library-grid"
+                id="libraryGrid"
+            ></div>
+
+        </section>
+
+
+        <!-- =================================================
+             RECENT VIEW
+        ================================================== -->
+
+        <section
+            class="view recent-view"
+            id="recentView"
+        >
+
+            <div class="view-heading">
+
+                <span>
+                    APX
+                </span>
+
+                <h1>
+                    Recent Sessions
+                </h1>
+
+                <p>
+                    Quickly return to games you've recently played
+                    through APX.
+                </p>
+
+            </div>
+
+
+            <div
+                class="recent-list"
+                id="recentList"
+            ></div>
+
+        </section>
+
+
+        <!-- =================================================
+             GAME DETAILS PANEL
+        ================================================== -->
+
+        <aside
+            class="details-panel"
+            id="detailsPanel"
+            aria-hidden="true"
+        >
+
+            <button
+                class="details-close"
+                id="detailsClose"
+                type="button"
+            >
+                ✕
+            </button>
+
+
+            <div class="details-content">
+
+                <span class="details-eyebrow">
+                    APX CLOUD GAME
+                </span>
+
+                <h2 id="detailsTitle">
+                    Apex Demo
+                </h2>
+
+                <p id="detailsDescription">
+                    Game description.
+                </p>
+
+
+                <div class="details-info">
+
+                    <div>
+                        <span>Developer</span>
+
+                        <strong id="detailsDeveloper">
+                            Apex Games
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Genre</span>
+
+                        <strong id="detailsGenre">
+                            Action
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Cloud</span>
+
+                        <strong>
+                            APX Ready
+                        </strong>
+                    </div>
+
+                </div>
+
+
+                <button
+                    class="play-button details-play"
+                    id="detailsPlayButton"
+                    type="button"
+                >
+                    ▶ Play on APX
+                </button>
+
+            </div>
+
+        </aside>
+
+
+        <!-- =================================================
+             SESSION LAUNCH
+        ================================================== -->
+
+        <section
+            class="session-overlay"
+            id="sessionOverlay"
+            hidden
+        >
+
+            <div class="session-background"></div>
+
+
+            <div class="session-card">
+
+                <span class="session-label">
+                    APX CLOUD SESSION
+                </span>
+
+                <h2 id="sessionTitle">
+                    Apex Demo
+                </h2>
+
+                <div
+                    class="session-spinner"
+                    id="sessionSpinner"
+                ></div>
+
+                <strong
+                    class="session-status"
+                    id="sessionStatus"
+                >
+                    Preparing your session...
+                </strong>
+
+                <p id="sessionDescription">
+                    APX is checking your cloud gaming session.
+                </p>
+
+
+                <button
+                    class="cancel-session"
+                    id="cancelSession"
+                    type="button"
+                >
+                    Cancel
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             PROTOTYPE NOTICE
+        ================================================== -->
+
+        <div class="prototype-badge">
+            APX v0.1 UI Prototype
+        </div>
+
+    </main>
+
+
+    <script src="script.js?v=1"></script>
+
+</body>
+</html>
