@@ -1,15 +1,13 @@
 /* =========================================================
    APX CLOUD GAMING
-   v0.1 UI PROTOTYPE
+   CONSOLE UI v0.2
 ========================================================= */
 
 
 /* =========================================================
-   GAMES
+   TEMPORARY CLOUD LIBRARY
 
-   Future:
-   This should eventually come from the user's REAL
-   Apex Games Library + cloud compatibility data.
+   Later this comes from the REAL Apex Games Library.
 ========================================================= */
 
 const APX_GAMES = [
@@ -28,14 +26,9 @@ const APX_GAMES = [
         description:
             "Enter the Apex Games ecosystem through the cloud with the official demonstration experience.",
 
-        cloudReady: true,
-
         accent: "blue",
 
-        lastPlayed: "Today",
-
-        progress: "Ready to play"
-
+        cloudReady: true
     },
 
 
@@ -53,24 +46,19 @@ const APX_GAMES = [
         description:
             "An upcoming Apex Games adventure currently in development.",
 
-        cloudReady: true,
-
         accent: "dark",
 
-        lastPlayed: "Not played",
-
-        progress: "Coming Soon"
-
+        cloudReady: true
     }
 
 ];
 
 
-let selectedGame =
-    APX_GAMES[0];
+let selectedIndex = 0;
 
-let currentView =
-    "home";
+let currentScreen = "games";
+
+let sessionCancelled = false;
 
 
 /* =========================================================
@@ -83,44 +71,53 @@ const bootScreen =
 const bootStatus =
     document.getElementById("bootStatus");
 
-const hero =
-    document.getElementById("hero");
+const gameBackground =
+    document.getElementById("gameBackground");
 
-const heroTitle =
-    document.getElementById("heroTitle");
+const selectedEyebrow =
+    document.getElementById("selectedEyebrow");
 
-const heroDescription =
-    document.getElementById("heroDescription");
+const selectedTitle =
+    document.getElementById("selectedTitle");
 
-const heroGenre =
-    document.getElementById("heroGenre");
+const selectedDescription =
+    document.getElementById("selectedDescription");
 
-const heroPosition =
-    document.getElementById("heroPosition");
+const selectedGenre =
+    document.getElementById("selectedGenre");
 
-const heroPlayButton =
-    document.getElementById("heroPlayButton");
+const selectedDeveloper =
+    document.getElementById("selectedDeveloper");
 
-const heroDetailsButton =
-    document.getElementById("heroDetailsButton");
+const playButton =
+    document.getElementById("playButton");
 
-const continueGames =
-    document.getElementById("continueGames");
+const detailsButton =
+    document.getElementById("detailsButton");
 
-const cloudGames =
-    document.getElementById("cloudGames");
+const gameCarousel =
+    document.getElementById("gameCarousel");
+
+const previousGame =
+    document.getElementById("previousGame");
+
+const nextGame =
+    document.getElementById("nextGame");
+
+const carouselCurrent =
+    document.getElementById("carouselCurrent");
+
+const carouselTotal =
+    document.getElementById("carouselTotal");
 
 const libraryGrid =
     document.getElementById("libraryGrid");
 
-const recentList =
-    document.getElementById("recentList");
+const detailsOverlay =
+    document.getElementById("detailsOverlay");
 
-const detailsPanel =
-    document.getElementById("detailsPanel");
-
-const detailsClose =
-    document.getElementById("detailsClose");
+const closeDetails =
+    document.getElementById("closeDetails");
 
 const detailsTitle =
     document.getElementById("detailsTitle");
@@ -137,24 +134,6 @@ const detailsGenre =
 const detailsPlayButton =
     document.getElementById("detailsPlayButton");
 
-const sessionOverlay =
-    document.getElementById("sessionOverlay");
-
-const sessionTitle =
-    document.getElementById("sessionTitle");
-
-const sessionStatus =
-    document.getElementById("sessionStatus");
-
-const sessionDescription =
-    document.getElementById("sessionDescription");
-
-const sessionSpinner =
-    document.getElementById("sessionSpinner");
-
-const cancelSession =
-    document.getElementById("cancelSession");
-
 const searchButton =
     document.getElementById("searchButton");
 
@@ -170,40 +149,117 @@ const searchInput =
 const searchResults =
     document.getElementById("searchResults");
 
+const aiTopButton =
+    document.getElementById("aiTopButton");
+
+const aiOverlay =
+    document.getElementById("aiOverlay");
+
+const closeAI =
+    document.getElementById("closeAI");
+
+const aiForm =
+    document.getElementById("aiForm");
+
+const aiInput =
+    document.getElementById("aiInput");
+
+const aiHeading =
+    document.getElementById("aiHeading");
+
+const aiResponse =
+    document.getElementById("aiResponse");
+
+const aiOrb =
+    document.getElementById("aiOrb");
+
+const sessionOverlay =
+    document.getElementById("sessionOverlay");
+
+const sessionGameTitle =
+    document.getElementById("sessionGameTitle");
+
+const sessionLoader =
+    document.getElementById("sessionLoader");
+
+const sessionStatus =
+    document.getElementById("sessionStatus");
+
+const sessionMessage =
+    document.getElementById("sessionMessage");
+
+const cancelSession =
+    document.getElementById("cancelSession");
+
+const settingsButton =
+    document.getElementById("settingsButton");
+
+const settingsOverlay =
+    document.getElementById("settingsOverlay");
+
+const closeSettings =
+    document.getElementById("closeSettings");
+
+const systemTime =
+    document.getElementById("systemTime");
+
+const systemDate =
+    document.getElementById("systemDate");
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function wait(milliseconds) {
+
+    return new Promise(
+        resolve =>
+            setTimeout(resolve, milliseconds)
+    );
+
+}
+
+
+function currentGame() {
+
+    return APX_GAMES[selectedIndex];
+
+}
+
+
+function padNumber(number) {
+
+    return String(number).padStart(2, "0");
+
+}
+
 
 /* =========================================================
    BOOT
 ========================================================= */
 
-async function startAPX() {
+async function bootAPX() {
 
-    const statuses = [
+    const steps = [
 
-        "Starting APX",
+        ["Starting APX", 500],
 
-        "Connecting to Apex Games",
+        ["Connecting to Apex Games", 550],
 
-        "Loading your cloud library",
+        ["Loading Cloud Library", 550],
 
-        "APX Ready"
+        ["APX Ready", 350]
 
     ];
 
 
-    for (
-        let index = 0;
-        index < statuses.length;
-        index++
-    ) {
+    for (const [message, delay] of steps) {
 
         bootStatus.textContent =
-            statuses[index];
+            message;
 
-        await wait(
-            index === statuses.length - 1
-                ? 350
-                : 480
-        );
+        await wait(delay);
 
     }
 
@@ -212,42 +268,52 @@ async function startAPX() {
         "complete"
     );
 
-    document.body.classList.remove(
-        "booting"
-    );
+}
 
-    document.body.classList.add(
-        "ready"
-    );
+
+/* =========================================================
+   CLOCK
+========================================================= */
+
+function updateClock() {
+
+    const now =
+        new Date();
+
+
+    systemTime.textContent =
+        now.toLocaleTimeString(
+            [],
+            {
+                hour: "numeric",
+                minute: "2-digit"
+            }
+        );
+
+
+    systemDate.textContent =
+        now.toLocaleDateString(
+            [],
+            {
+                month: "short",
+                day: "numeric"
+            }
+        );
 
 }
 
 
 /* =========================================================
-   WAIT
+   GAME TILE
 ========================================================= */
 
-function wait(milliseconds) {
-
-    return new Promise(
-        resolve =>
-            setTimeout(
-                resolve,
-                milliseconds
-            )
-    );
-
-}
-
-
-/* =========================================================
-   CARD HTML
-========================================================= */
-
-function createGameCard(game) {
+function gameTileHTML(
+    game,
+    index
+) {
 
     const selected =
-        game.id === selectedGame.id
+        index === selectedIndex
             ? "selected"
             : "";
 
@@ -260,12 +326,13 @@ function createGameCard(game) {
     return `
 
         <article
-            class="game-card ${dark} ${selected}"
-            data-game-id="${game.id}"
+            class="game-tile ${selected} ${dark}"
+            data-game-index="${index}"
             tabindex="0"
+            aria-label="${game.title}"
         >
 
-            <div class="game-card-art">
+            <div class="tile-art">
 
                 <strong>
                     ${game.artTitle}
@@ -274,15 +341,15 @@ function createGameCard(game) {
             </div>
 
 
-            <div class="game-card-overlay">
+            <div class="tile-footer">
 
                 <span>
                     APX READY
                 </span>
 
-                <h3>
+                <strong>
                     ${game.title}
-                </h3>
+                </strong>
 
             </div>
 
@@ -294,176 +361,167 @@ function createGameCard(game) {
 
 
 /* =========================================================
-   RENDER GAMES
+   RENDER
 ========================================================= */
 
-function renderGames() {
+function renderCarousel() {
 
-    const cloudReadyGames =
-        APX_GAMES.filter(
-            game =>
-                game.cloudReady
-        );
-
-
-    continueGames.innerHTML =
-        cloudReadyGames
-            .slice(0, 2)
-            .map(createGameCard)
+    gameCarousel.innerHTML =
+        APX_GAMES
+            .map(gameTileHTML)
             .join("");
 
 
-    cloudGames.innerHTML =
-        cloudReadyGames
-            .map(createGameCard)
-            .join("");
+    carouselTotal.textContent =
+        padNumber(APX_GAMES.length);
 
 
-    libraryGrid.innerHTML =
-        cloudReadyGames
-            .map(createGameCard)
-            .join("");
+    bindGameTiles();
 
 
-    bindGameCards();
+    requestAnimationFrame(
+        scrollSelectedIntoView
+    );
 
 }
 
 
-/* =========================================================
-   RECENT
-========================================================= */
+function renderLibrary() {
 
-function renderRecent() {
-
-    recentList.innerHTML =
+    libraryGrid.innerHTML =
         APX_GAMES
+            .filter(
+                game =>
+                    game.cloudReady
+            )
             .map(
-                game => `
+                (game) => {
 
-                    <article class="recent-item">
+                    const realIndex =
+                        APX_GAMES.indexOf(game);
 
-                        <div class="recent-art">
-                            ${game.artTitle}
-                        </div>
+                    return gameTileHTML(
+                        game,
+                        realIndex
+                    );
 
-                        <div class="recent-copy">
-
-                            <h3>
-                                ${game.title}
-                            </h3>
-
-                            <p>
-                                ${game.lastPlayed}
-                                ·
-                                ${game.progress}
-                            </p>
-
-                        </div>
-
-                    </article>
-
-                `
+                }
             )
             .join("");
 
+
+    bindGameTiles();
+
 }
 
 
 /* =========================================================
-   GAME SELECT
+   SELECT GAME
 ========================================================= */
 
-function selectGame(gameId) {
+function selectGame(index) {
 
-    const game =
-        APX_GAMES.find(
-            item =>
-                item.id === gameId
-        );
-
-
-    if (!game) {
+    if (
+        index < 0 ||
+        index >= APX_GAMES.length
+    ) {
         return;
     }
 
 
-    selectedGame =
-        game;
+    selectedIndex =
+        index;
 
 
-    updateHero();
+    updateSelectedGame();
 
-    renderGames();
+    renderCarousel();
+
+    renderLibrary();
 
 }
 
 
 /* =========================================================
-   HERO
+   UPDATE SELECTED GAME
 ========================================================= */
 
-function updateHero() {
+function updateSelectedGame() {
 
-    heroTitle.textContent =
-        selectedGame.title;
-
-    heroDescription.textContent =
-        selectedGame.description;
-
-    heroGenre.textContent =
-        selectedGame.genre;
+    const game =
+        currentGame();
 
 
-    const index =
-        APX_GAMES.findIndex(
-            game =>
-                game.id === selectedGame.id
+    selectedTitle.textContent =
+        game.title;
+
+    selectedDescription.textContent =
+        game.description;
+
+    selectedGenre.textContent =
+        game.genre;
+
+    selectedDeveloper.textContent =
+        game.developer;
+
+
+    carouselCurrent.textContent =
+        padNumber(
+            selectedIndex + 1
         );
 
 
-    heroPosition.textContent =
-        `${String(index + 1).padStart(2, "0")} / ${String(APX_GAMES.length).padStart(2, "0")}`;
-
-
-    hero.classList.toggle(
+    gameBackground.classList.toggle(
         "dark",
-        selectedGame.accent === "dark"
+        game.accent === "dark"
     );
 
 }
 
 
 /* =========================================================
-   BIND GAME CARDS
+   BIND TILES
 ========================================================= */
 
-function bindGameCards() {
+function bindGameTiles() {
 
     document
         .querySelectorAll(
-            ".game-card"
+            ".game-tile"
         )
         .forEach(
-            card => {
+            tile => {
 
-                card.addEventListener(
+                tile.addEventListener(
                     "click",
                     () => {
 
-                        selectGame(
-                            card.dataset.gameId
-                        );
+                        const index =
+                            Number(
+                                tile.dataset.gameIndex
+                            );
 
-                        switchView(
-                            "home"
-                        );
+
+                        selectGame(index);
+
+
+                        if (
+                            tile.closest(
+                                "#libraryGrid"
+                            )
+                        ) {
+
+                            switchScreen(
+                                "games"
+                            );
+
+                        }
 
                     }
                 );
 
 
-                card.addEventListener(
+                tile.addEventListener(
                     "keydown",
                     event => {
 
@@ -474,7 +532,7 @@ function bindGameCards() {
 
                             event.preventDefault();
 
-                            card.click();
+                            tile.click();
 
                         }
 
@@ -488,54 +546,105 @@ function bindGameCards() {
 
 
 /* =========================================================
-   NAVIGATION
+   SCROLL SELECTED
 ========================================================= */
 
-function switchView(viewName) {
+function scrollSelectedIntoView() {
 
-    currentView =
-        viewName;
-
-
-    document
-        .querySelectorAll(".view")
-        .forEach(
-            view =>
-                view.classList.remove(
-                    "active"
-                )
+    const selected =
+        gameCarousel.querySelector(
+            ".game-tile.selected"
         );
 
 
-    document
-        .querySelector(
-            `#${viewName}View`
-        )
-        ?.classList.add(
-            "active"
-        );
+    selected?.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center"
+    });
+
+}
+
+
+/* =========================================================
+   NEXT / PREVIOUS
+========================================================= */
+
+function goNext() {
+
+    const next =
+        (
+            selectedIndex + 1
+        ) % APX_GAMES.length;
+
+
+    selectGame(next);
+
+}
+
+
+function goPrevious() {
+
+    const previous =
+        (
+            selectedIndex -
+            1 +
+            APX_GAMES.length
+        ) % APX_GAMES.length;
+
+
+    selectGame(previous);
+
+}
+
+
+/* =========================================================
+   SCREENS
+========================================================= */
+
+function switchScreen(name) {
+
+    currentScreen =
+        name;
 
 
     document
         .querySelectorAll(
-            ".nav-button"
+            ".games-screen, .secondary-screen"
+        )
+        .forEach(
+            screen =>
+                screen.classList.remove(
+                    "active-screen"
+                )
+        );
+
+
+    const screen =
+        document.getElementById(
+            `${name}Screen`
+        );
+
+
+    screen?.classList.add(
+        "active-screen"
+    );
+
+
+    document
+        .querySelectorAll(
+            ".system-nav"
         )
         .forEach(
             button => {
 
                 button.classList.toggle(
                     "active",
-                    button.dataset.view === viewName
+                    button.dataset.section === name
                 );
 
             }
         );
-
-
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
 
 }
 
@@ -544,135 +653,35 @@ function switchView(viewName) {
    DETAILS
 ========================================================= */
 
-function openDetails() {
+function openGameDetails() {
+
+    const game =
+        currentGame();
+
 
     detailsTitle.textContent =
-        selectedGame.title;
+        game.title;
 
     detailsDescription.textContent =
-        selectedGame.description;
+        game.description;
 
     detailsDeveloper.textContent =
-        selectedGame.developer;
+        game.developer;
 
     detailsGenre.textContent =
-        selectedGame.genre;
+        game.genre;
 
 
-    detailsPanel.classList.add(
-        "open"
-    );
-
-    detailsPanel.setAttribute(
-        "aria-hidden",
-        "false"
-    );
+    detailsOverlay.hidden =
+        false;
 
 }
 
 
-function closeDetailsPanel() {
+function closeGameDetails() {
 
-    detailsPanel.classList.remove(
-        "open"
-    );
-
-    detailsPanel.setAttribute(
-        "aria-hidden",
-        "true"
-    );
-
-}
-
-
-/* =========================================================
-   CLOUD SESSION
-
-   UI PROTOTYPE ONLY.
-
-   No actual remote gaming server exists yet.
-========================================================= */
-
-async function launchSession() {
-
-    closeDetailsPanel();
-
-
-    sessionOverlay.hidden =
-        false;
-
-    sessionTitle.textContent =
-        selectedGame.title;
-
-
-    sessionSpinner.hidden =
-        false;
-
-    cancelSession.hidden =
-        false;
-
-
-    const states = [
-
-        [
-            "Checking your Apex Games Library...",
-            "Confirming this title is available for APX."
-        ],
-
-        [
-            "Finding an APX server...",
-            "Searching for an available cloud gaming session."
-        ],
-
-        [
-            "Preparing your session...",
-            "Getting your cloud environment ready."
-        ]
-
-    ];
-
-
-    for (const state of states) {
-
-        if (
-            sessionOverlay.hidden
-        ) {
-            return;
-        }
-
-
-        sessionStatus.textContent =
-            state[0];
-
-        sessionDescription.textContent =
-            state[1];
-
-
-        await wait(850);
-
-    }
-
-
-    if (
-        sessionOverlay.hidden
-    ) {
-        return;
-    }
-
-
-    sessionSpinner.hidden =
+    detailsOverlay.hidden =
         true;
-
-
-    sessionStatus.textContent =
-        "APX Cloud Streaming isn't connected yet.";
-
-    sessionDescription.textContent =
-        "This is the APX v0.1 interface prototype. Real cloud gaming servers and streaming will be connected in a future version.";
-
-
-    cancelSession.textContent =
-        "Return to APX";
 
 }
 
@@ -681,7 +690,7 @@ async function launchSession() {
    SEARCH
 ========================================================= */
 
-function openSearch() {
+function openGameSearch() {
 
     searchOverlay.hidden =
         false;
@@ -697,13 +706,13 @@ function openSearch() {
     setTimeout(
         () =>
             searchInput.focus(),
-        50
+        60
     );
 
 }
 
 
-function closeSearchOverlay() {
+function closeGameSearch() {
 
     searchOverlay.hidden =
         true;
@@ -713,30 +722,23 @@ function closeSearchOverlay() {
 
 function renderSearchResults(games) {
 
-    if (
-        games.length === 0
-    ) {
+    if (!games.length) {
 
-        searchResults.innerHTML =
-            `
+        searchResults.innerHTML = `
 
-                <div class="recent-item">
+            <div class="search-result">
 
-                    <div class="recent-copy">
+                <div>
+                    <h3>No games found</h3>
 
-                        <h3>
-                            No games found
-                        </h3>
-
-                        <p>
-                            Try another search.
-                        </p>
-
-                    </div>
-
+                    <p>
+                        Try another search.
+                    </p>
                 </div>
 
-            `;
+            </div>
+
+        `;
 
         return;
 
@@ -746,42 +748,48 @@ function renderSearchResults(games) {
     searchResults.innerHTML =
         games
             .map(
-                game => `
+                game => {
 
-                    <article
-                        class="recent-item search-game"
-                        data-game-id="${game.id}"
-                        tabindex="0"
-                    >
+                    const index =
+                        APX_GAMES.indexOf(game);
 
-                        <div class="recent-art">
-                            ${game.artTitle}
-                        </div>
 
-                        <div class="recent-copy">
+                    return `
 
-                            <h3>
-                                ${game.title}
-                            </h3>
+                        <article
+                            class="search-result"
+                            data-search-index="${index}"
+                        >
 
-                            <p>
-                                ${game.genre}
-                                ·
-                                APX Ready
-                            </p>
+                            <div class="search-result-art">
+                                ${game.artTitle}
+                            </div>
 
-                        </div>
+                            <div>
 
-                    </article>
+                                <h3>
+                                    ${game.title}
+                                </h3>
 
-                `
+                                <p>
+                                    ${game.genre}
+                                    · APX Ready
+                                </p>
+
+                            </div>
+
+                        </article>
+
+                    `;
+
+                }
             )
             .join("");
 
 
     document
         .querySelectorAll(
-            ".search-game"
+            "[data-search-index]"
         )
         .forEach(
             result => {
@@ -791,13 +799,15 @@ function renderSearchResults(games) {
                     () => {
 
                         selectGame(
-                            result.dataset.gameId
+                            Number(
+                                result.dataset.searchIndex
+                            )
                         );
 
-                        closeSearchOverlay();
+                        closeGameSearch();
 
-                        switchView(
-                            "home"
+                        switchScreen(
+                            "games"
                         );
 
                     }
@@ -810,107 +820,312 @@ function renderSearchResults(games) {
 
 
 /* =========================================================
-   EVENT LISTENERS
+   APX AI
 ========================================================= */
 
-document
-    .querySelectorAll(
-        ".nav-button"
-    )
-    .forEach(
-        button => {
+function openAPXAI() {
 
-            button.addEventListener(
-                "click",
-                () =>
-                    switchView(
-                        button.dataset.view
-                    )
-            );
+    aiOverlay.hidden =
+        false;
 
-        }
-    );
+    aiHeading.textContent =
+        "What do you want to play?";
+
+    aiResponse.textContent =
+        'Try saying something like "Open Apex Demo."';
+
+    aiInput.value =
+        "";
 
 
-document
-    .querySelectorAll(
-        "[data-open-library]"
-    )
-    .forEach(
-        button => {
-
-            button.addEventListener(
-                "click",
-                () =>
-                    switchView(
-                        "library"
-                    )
-            );
-
-        }
-    );
-
-
-document
-    .getElementById(
-        "homeButton"
-    )
-    .addEventListener(
-        "click",
+    setTimeout(
         () =>
-            switchView(
-                "home"
-            )
+            aiInput.focus(),
+        70
     );
 
+}
 
-heroDetailsButton.addEventListener(
+
+function closeAPXAI() {
+
+    aiOverlay.hidden =
+        true;
+
+}
+
+
+/* =========================================================
+   APX AI COMMAND
+========================================================= */
+
+async function processAICommand(
+    rawCommand
+) {
+
+    const command =
+        rawCommand
+            .trim()
+            .toLowerCase();
+
+
+    if (!command) {
+        return;
+    }
+
+
+    aiHeading.textContent =
+        "APX is listening...";
+
+    aiResponse.textContent =
+        rawCommand;
+
+
+    await wait(300);
+
+
+    /* Library */
+
+    if (
+        command.includes("library")
+    ) {
+
+        aiHeading.textContent =
+            "Sure!";
+
+        aiResponse.textContent =
+            "Opening your Apex Games Library.";
+
+
+        await wait(650);
+
+
+        closeAPXAI();
+
+        switchScreen(
+            "library"
+        );
+
+        return;
+
+    }
+
+
+    /* Find matching game */
+
+    const matchedGame =
+        APX_GAMES.find(
+            game => {
+
+                const title =
+                    game.title.toLowerCase();
+
+
+                return (
+                    command.includes(title) ||
+                    title
+                        .split(" ")
+                        .every(
+                            word =>
+                                command.includes(word)
+                        )
+                );
+
+            }
+        );
+
+
+    if (matchedGame) {
+
+        const index =
+            APX_GAMES.indexOf(
+                matchedGame
+            );
+
+
+        aiHeading.textContent =
+            "Sure!";
+
+        aiResponse.textContent =
+            `Opening ${matchedGame.title}.`;
+
+
+        await wait(700);
+
+
+        selectGame(index);
+
+        switchScreen(
+            "games"
+        );
+
+
+        await wait(300);
+
+
+        closeAPXAI();
+
+
+        await wait(300);
+
+
+        launchCloudSession();
+
+        return;
+
+    }
+
+
+    /* Unknown */
+
+    aiHeading.textContent =
+        "I couldn't find that game.";
+
+    aiResponse.textContent =
+        "Try asking me to open a game that's currently in your APX Library.";
+
+}
+
+
+/* =========================================================
+   CLOUD SESSION
+
+   UI PROTOTYPE ONLY.
+   DOES NOT CLAIM A REAL SERVER EXISTS.
+========================================================= */
+
+async function launchCloudSession() {
+
+    sessionCancelled =
+        false;
+
+
+    const game =
+        currentGame();
+
+
+    sessionOverlay.hidden =
+        false;
+
+    sessionGameTitle.textContent =
+        game.title;
+
+    sessionLoader.hidden =
+        false;
+
+    cancelSession.textContent =
+        "Cancel";
+
+
+    const states = [
+
+        [
+            "Checking your Apex Games Library...",
+            "Confirming access to this title."
+        ],
+
+        [
+            "Checking APX compatibility...",
+            "Preparing the cloud gaming experience."
+        ],
+
+        [
+            "Looking for an APX session...",
+            "Cloud streaming infrastructure is currently a prototype."
+        ]
+
+    ];
+
+
+    for (const state of states) {
+
+        if (sessionCancelled) {
+            return;
+        }
+
+
+        sessionStatus.textContent =
+            state[0];
+
+        sessionMessage.textContent =
+            state[1];
+
+
+        await wait(850);
+
+    }
+
+
+    if (sessionCancelled) {
+        return;
+    }
+
+
+    sessionLoader.hidden =
+        true;
+
+
+    sessionStatus.textContent =
+        "APX streaming isn't connected yet.";
+
+    sessionMessage.textContent =
+        "This is the APX v0.2 interface prototype. Real remote game streaming will be connected in a future version.";
+
+    cancelSession.textContent =
+        "Return to APX";
+
+}
+
+
+/* =========================================================
+   EVENTS
+========================================================= */
+
+previousGame.addEventListener(
     "click",
-    openDetails
+    goPrevious
 );
 
 
-detailsClose.addEventListener(
+nextGame.addEventListener(
     "click",
-    closeDetailsPanel
+    goNext
 );
 
 
-heroPlayButton.addEventListener(
+playButton.addEventListener(
     "click",
-    launchSession
+    launchCloudSession
+);
+
+
+detailsButton.addEventListener(
+    "click",
+    openGameDetails
 );
 
 
 detailsPlayButton.addEventListener(
     "click",
-    launchSession
+    launchCloudSession
 );
 
 
-cancelSession.addEventListener(
+closeDetails.addEventListener(
     "click",
-    () => {
-
-        sessionOverlay.hidden =
-            true;
-
-        cancelSession.textContent =
-            "Cancel";
-
-    }
+    closeGameDetails
 );
 
 
 searchButton.addEventListener(
     "click",
-    openSearch
+    openGameSearch
 );
 
 
 closeSearch.addEventListener(
     "click",
-    closeSearchOverlay
+    closeGameSearch
 );
 
 
@@ -924,7 +1139,7 @@ searchInput.addEventListener(
                 .toLowerCase();
 
 
-        const matches =
+        const games =
             APX_GAMES.filter(
                 game =>
                     game.title
@@ -938,24 +1153,225 @@ searchInput.addEventListener(
 
 
         renderSearchResults(
-            matches
+            games
         );
 
     }
 );
 
 
+aiTopButton.addEventListener(
+    "click",
+    openAPXAI
+);
+
+
+closeAI.addEventListener(
+    "click",
+    closeAPXAI
+);
+
+
+aiForm.addEventListener(
+    "submit",
+    event => {
+
+        event.preventDefault();
+
+        processAICommand(
+            aiInput.value
+        );
+
+    }
+);
+
+
+document
+    .querySelectorAll(
+        "[data-ai-command]"
+    )
+    .forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    const command =
+                        button.dataset.aiCommand;
+
+
+                    aiInput.value =
+                        command;
+
+
+                    processAICommand(
+                        command
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+cancelSession.addEventListener(
+    "click",
+    () => {
+
+        sessionCancelled =
+            true;
+
+        sessionOverlay.hidden =
+            true;
+
+    }
+);
+
+
+settingsButton.addEventListener(
+    "click",
+    () => {
+
+        settingsOverlay.hidden =
+            false;
+
+    }
+);
+
+
+closeSettings.addEventListener(
+    "click",
+    () => {
+
+        settingsOverlay.hidden =
+            true;
+
+    }
+);
+
+
+document
+    .querySelectorAll(
+        ".system-nav"
+    )
+    .forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    switchScreen(
+                        button.dataset.section
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "apxHomeButton"
+    )
+    .addEventListener(
+        "click",
+        () =>
+            switchScreen(
+                "games"
+            )
+    );
+
+
+/* =========================================================
+   KEYBOARD / CONSOLE-LIKE NAVIGATION
+========================================================= */
+
 document.addEventListener(
     "keydown",
     event => {
+
+        const overlayOpen =
+            !detailsOverlay.hidden ||
+            !searchOverlay.hidden ||
+            !aiOverlay.hidden ||
+            !sessionOverlay.hidden ||
+            !settingsOverlay.hidden;
+
 
         if (
             event.key === "Escape"
         ) {
 
-            closeDetailsPanel();
+            closeGameDetails();
 
-            closeSearchOverlay();
+            closeGameSearch();
+
+            closeAPXAI();
+
+            settingsOverlay.hidden =
+                true;
+
+            return;
+
+        }
+
+
+        if (overlayOpen) {
+            return;
+        }
+
+
+        if (
+            currentScreen === "games"
+        ) {
+
+            if (
+                event.key === "ArrowRight"
+            ) {
+
+                event.preventDefault();
+
+                goNext();
+
+            }
+
+
+            if (
+                event.key === "ArrowLeft"
+            ) {
+
+                event.preventDefault();
+
+                goPrevious();
+
+            }
+
+
+            if (
+                event.key === "Enter"
+            ) {
+
+                event.preventDefault();
+
+                launchCloudSession();
+
+            }
+
+
+            if (
+                event.key.toLowerCase() === "a"
+            ) {
+
+                event.preventDefault();
+
+                openAPXAI();
+
+            }
 
         }
 
@@ -969,13 +1385,28 @@ document.addEventListener(
 
 function initAPX() {
 
-    renderGames();
+    carouselTotal.textContent =
+        padNumber(
+            APX_GAMES.length
+        );
 
-    renderRecent();
 
-    updateHero();
+    renderCarousel();
 
-    startAPX();
+    renderLibrary();
+
+    updateSelectedGame();
+
+    updateClock();
+
+
+    setInterval(
+        updateClock,
+        30000
+    );
+
+
+    bootAPX();
 
 }
 
