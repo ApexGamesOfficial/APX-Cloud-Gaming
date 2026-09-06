@@ -477,6 +477,116 @@ function moveFocusFrame(
 }
 
 
+/* =========================================================
+   LIVE FOCUS TRACKING
+
+   v0.31 FIX:
+   The selected game card is moving AND scaling during the
+   carousel transition. Measuring it once causes the blue
+   focus frame to get left behind.
+
+   This follows the card for the entire animation.
+========================================================= */
+
+let focusTrackingFrame = null;
+
+
+function trackFocusDuringAnimation(
+    element,
+    duration = 800
+) {
+
+    if (!element) {
+        return;
+    }
+
+
+    if (
+        focusTrackingFrame !== null
+    ) {
+
+        cancelAnimationFrame(
+            focusTrackingFrame
+        );
+
+
+        focusTrackingFrame =
+            null;
+
+    }
+
+
+    const start =
+        performance.now();
+
+
+    function track(now) {
+
+        if (
+            activePage !== "home" ||
+            window.scrollY >=
+                window.innerHeight * .55 ||
+            element.offsetParent === null
+        ) {
+
+            focusTrackingFrame =
+                null;
+
+            return;
+
+        }
+
+
+        /*
+           Measure the REAL rendered position every frame.
+           This includes the CSS transform + scale while
+           the carousel is moving.
+        */
+
+        moveFocusFrame(
+            element
+        );
+
+
+        if (
+            now - start <
+            duration
+        ) {
+
+            focusTrackingFrame =
+                requestAnimationFrame(
+                    track
+                );
+
+
+            return;
+
+        }
+
+
+        /*
+           Final measurement after everything has landed.
+        */
+
+        moveFocusFrame(
+            element
+        );
+
+
+        focusTrackingFrame =
+            null;
+
+    }
+
+
+    focusTrackingFrame =
+        requestAnimationFrame(
+            track
+        );
+
+}
+
+
 function hideFocusFrame() {
 
     focusFrame.classList.remove(
@@ -854,17 +964,6 @@ function updateCarousel(
                 );
 
 
-            /*
-               Selected card:
-               center + full size.
-
-               Neighbor:
-               pushed sideways and smaller.
-
-               Further cards:
-               even smaller and dimmer.
-            */
-
             let scale =
                 1;
 
@@ -995,37 +1094,31 @@ function updateCarousel(
         animateFocus
     ) {
 
-        /*
-           The focus ring waits slightly so it glides
-           toward the newly selected card as the carousel
-           itself begins moving.
-        */
-
-        setTimeout(
-            () => {
-
-                const selected =
-                    document.querySelector(
-                        ".game-card.selected"
-                    );
+        const selected =
+            document.querySelector(
+                ".game-card.selected"
+            );
 
 
-                if (
-                    selected &&
-                    activePage === "home" &&
-                    window.scrollY <
-                    window.innerHeight * .55
-                ) {
+        if (
+            selected &&
+            activePage === "home" &&
+            window.scrollY <
+                window.innerHeight * .55
+        ) {
 
-                    moveFocusFrame(
-                        selected
-                    );
+            /*
+               Keep the universal APX focus frame attached
+               to the selected game for the entire carousel
+               transition instead of measuring it once.
+            */
 
-                }
+            trackFocusDuringAnimation(
+                selected,
+                800
+            );
 
-            },
-            45
-        );
+        }
 
     }
 
@@ -1056,10 +1149,6 @@ async function selectGame(
         true;
 
 
-    /*
-       Fade current title down while cards begin moving.
-    */
-
     selectedGameCopy.classList.add(
         "changing"
     );
@@ -1070,25 +1159,21 @@ async function selectGame(
 
 
     /*
-       Existing cards now physically move.
+       Existing cards physically glide to their
+       new positions.
+
+       updateCarousel() now also keeps the focus frame
+       attached to the selected card during the move.
     */
 
     updateCarousel();
 
-
-    /*
-       Background starts crossfade at the same time.
-    */
 
     updateBackground();
 
 
     await wait(210);
 
-
-    /*
-       Change text during movement.
-    */
 
     updateGameInformation();
 
@@ -1101,10 +1186,6 @@ async function selectGame(
     );
 
 
-    /*
-       Carousel animation is roughly 720ms.
-    */
-
     await wait(430);
 
 
@@ -1112,8 +1193,6 @@ async function selectGame(
         false;
 
 }
-
-
 /* =========================================================
    NEXT / PREVIOUS
 ========================================================= */
