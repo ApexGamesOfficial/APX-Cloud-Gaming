@@ -1,20 +1,14 @@
 /* =========================================================
-   APX v0.3
+   APX v0.31
    SYSTEM UI
+
+   Main v0.31 change:
+   Persistent animated game carousel.
 ========================================================= */
 
 
 /* =========================================================
    TEMPORARY APX LIBRARY
-
-   Later:
-   Apex Games account
-       ↓
-   owned games
-       ↓
-   APX compatibility
-       ↓
-   this interface
 ========================================================= */
 
 const APX_GAMES = [
@@ -88,6 +82,8 @@ let activePage = "home";
 let backgroundLayer = 1;
 
 let quickAITimer = null;
+
+let carouselLocked = false;
 
 
 /* =========================================================
@@ -530,49 +526,63 @@ function bindFocusSystem() {
             }
         );
 
+}
 
-    document.addEventListener(
-        "mousemove",
-        event => {
+
+document.addEventListener(
+    "mousemove",
+    event => {
+
+        if (
+            !event.target.closest(
+                ".focusable"
+            )
+        ) {
+
+            const focused =
+                document.activeElement;
+
 
             if (
-                !event.target.closest(
-                    ".focusable"
+                !focused ||
+                !focused.classList?.contains(
+                    "focusable"
                 )
             ) {
 
-                const focused =
-                    document.activeElement;
-
-
-                if (
-                    !focused ||
-                    !focused.classList?.contains(
-                        "focusable"
-                    )
-                ) {
-
-                    hideFocusFrame();
-
-                }
+                hideFocusFrame();
 
             }
 
         }
-    );
 
-}
+    }
+);
 
 
 window.addEventListener(
     "resize",
     () => {
 
+        const hovered =
+            document.querySelector(
+                ".focusable:hover"
+            );
+
+
         const focused =
             document.activeElement;
 
 
-        if (
+        if (hovered) {
+
+            moveFocusFrame(
+                hovered
+            );
+
+        }
+
+        else if (
             focused?.classList?.contains(
                 "focusable"
             )
@@ -614,53 +624,20 @@ window.addEventListener(
 
 
 /* =========================================================
-   CAROUSEL
+   CREATE PERSISTENT CAROUSEL
+
+   This runs ONCE.
+
+   We no longer delete/recreate the cards when changing
+   selection. That allows CSS transitions to animate them.
 ========================================================= */
 
-function renderCarousel() {
+function createCarousel() {
 
     gameCarousel.innerHTML =
         APX_GAMES
             .map(
                 (game, index) => {
-
-                    let offset =
-                        index -
-                        selectedGameIndex;
-
-
-                    /*
-                     Circular carousel positioning.
-                    */
-
-                    const total =
-                        APX_GAMES.length;
-
-
-                    if (
-                        offset >
-                        total / 2
-                    ) {
-
-                        offset -= total;
-
-                    }
-
-
-                    if (
-                        offset <
-                        -total / 2
-                    ) {
-
-                        offset += total;
-
-                    }
-
-
-                    const selected =
-                        index ===
-                        selectedGameIndex;
-
 
                     return `
 
@@ -669,27 +646,13 @@ function renderCarousel() {
                                 game-card
                                 focusable
                                 ${
-                                    selected
-                                        ? "selected"
-                                        : ""
-                                }
-                                ${
                                     game.theme === "dark"
                                         ? "dark"
                                         : ""
                                 }
                             "
-                            style="
-                                --offset:${offset};
-                                z-index:${
-                                    20 -
-                                    Math.abs(
-                                        offset
-                                    )
-                                };
-                            "
                             data-game-index="${index}"
-                            data-focus-radius="26"
+                            data-focus-radius="28"
                             type="button"
                         >
 
@@ -769,6 +732,307 @@ function renderCarousel() {
 
 
 /* =========================================================
+   CAROUSEL DISTANCE
+========================================================= */
+
+function getCircularOffset(
+    index
+) {
+
+    let offset =
+        index -
+        selectedGameIndex;
+
+
+    const total =
+        APX_GAMES.length;
+
+
+    if (
+        offset >
+        total / 2
+    ) {
+
+        offset -= total;
+
+    }
+
+
+    if (
+        offset <
+        -total / 2
+    ) {
+
+        offset += total;
+
+    }
+
+
+    return offset;
+
+}
+
+
+/* =========================================================
+   RESPONSIVE CAROUSEL SPACING
+========================================================= */
+
+function getCarouselSpacing() {
+
+    const width =
+        window.innerWidth;
+
+
+    if (
+        width <= 560
+    ) {
+
+        return 205;
+
+    }
+
+
+    if (
+        width <= 760
+    ) {
+
+        return 245;
+
+    }
+
+
+    if (
+        width <= 1000
+    ) {
+
+        return 285;
+
+    }
+
+
+    return 350;
+
+}
+
+
+/* =========================================================
+   UPDATE CAROUSEL POSITIONS
+========================================================= */
+
+function updateCarousel(
+    animateFocus = true
+) {
+
+    const spacing =
+        getCarouselSpacing();
+
+
+    const cards =
+        document.querySelectorAll(
+            ".game-card"
+        );
+
+
+    cards.forEach(
+        card => {
+
+            const index =
+                Number(
+                    card.dataset.gameIndex
+                );
+
+
+            const offset =
+                getCircularOffset(
+                    index
+                );
+
+
+            const distance =
+                Math.abs(
+                    offset
+                );
+
+
+            /*
+               Selected card:
+               center + full size.
+
+               Neighbor:
+               pushed sideways and smaller.
+
+               Further cards:
+               even smaller and dimmer.
+            */
+
+            let scale =
+                1;
+
+            let opacity =
+                1;
+
+            let brightness =
+                1;
+
+            let depth =
+                0;
+
+
+            if (
+                distance === 0
+            ) {
+
+                scale =
+                    1.13;
+
+                opacity =
+                    1;
+
+                brightness =
+                    1;
+
+                depth =
+                    70;
+
+
+                card.classList.add(
+                    "selected"
+                );
+
+
+                card.style.zIndex =
+                    "50";
+
+            }
+
+            else if (
+                distance === 1
+            ) {
+
+                scale =
+                    .88;
+
+                opacity =
+                    .72;
+
+                brightness =
+                    .66;
+
+                depth =
+                    0;
+
+
+                card.classList.remove(
+                    "selected"
+                );
+
+
+                card.style.zIndex =
+                    "30";
+
+            }
+
+            else {
+
+                scale =
+                    .76;
+
+                opacity =
+                    .38;
+
+                brightness =
+                    .48;
+
+                depth =
+                    -80;
+
+
+                card.classList.remove(
+                    "selected"
+                );
+
+
+                card.style.zIndex =
+                    "10";
+
+            }
+
+
+            card.style.setProperty(
+                "--x",
+                `${offset * spacing}px`
+            );
+
+
+            card.style.setProperty(
+                "--scale",
+                scale
+            );
+
+
+            card.style.setProperty(
+                "--opacity",
+                opacity
+            );
+
+
+            card.style.setProperty(
+                "--brightness",
+                brightness
+            );
+
+
+            card.style.setProperty(
+                "--depth",
+                `${depth}px`
+            );
+
+        }
+    );
+
+
+    if (
+        animateFocus
+    ) {
+
+        /*
+           The focus ring waits slightly so it glides
+           toward the newly selected card as the carousel
+           itself begins moving.
+        */
+
+        setTimeout(
+            () => {
+
+                const selected =
+                    document.querySelector(
+                        ".game-card.selected"
+                    );
+
+
+                if (
+                    selected &&
+                    activePage === "home" &&
+                    window.scrollY <
+                    window.innerHeight * .55
+                ) {
+
+                    moveFocusFrame(
+                        selected
+                    );
+
+                }
+
+            },
+            45
+        );
+
+    }
+
+}
+
+
+/* =========================================================
    SELECT GAME
 ========================================================= */
 
@@ -779,32 +1043,57 @@ async function selectGame(
     if (
         index < 0 ||
         index >= APX_GAMES.length ||
-        index === selectedGameIndex
+        index === selectedGameIndex ||
+        carouselLocked
     ) {
+
         return;
+
     }
 
+
+    carouselLocked =
+        true;
+
+
+    /*
+       Fade current title down while cards begin moving.
+    */
 
     selectedGameCopy.classList.add(
         "changing"
     );
 
 
-    await wait(150);
-
-
     selectedGameIndex =
         index;
 
 
-    renderCarousel();
+    /*
+       Existing cards now physically move.
+    */
 
-    updateGameInformation();
+    updateCarousel();
+
+
+    /*
+       Background starts crossfade at the same time.
+    */
 
     updateBackground();
 
 
-    await wait(80);
+    await wait(210);
+
+
+    /*
+       Change text during movement.
+    */
+
+    updateGameInformation();
+
+
+    await wait(90);
 
 
     selectedGameCopy.classList.remove(
@@ -812,19 +1101,15 @@ async function selectGame(
     );
 
 
-    const selected =
-        document.querySelector(
-            ".game-card.selected"
-        );
+    /*
+       Carousel animation is roughly 720ms.
+    */
+
+    await wait(430);
 
 
-    if (selected) {
-
-        moveFocusFrame(
-            selected
-        );
-
-    }
+    carouselLocked =
+        false;
 
 }
 
@@ -835,28 +1120,48 @@ async function selectGame(
 
 function nextSelectedGame() {
 
+    if (
+        carouselLocked
+    ) {
+        return;
+    }
+
+
     const next =
         (
             selectedGameIndex + 1
-        ) % APX_GAMES.length;
+        ) %
+        APX_GAMES.length;
 
 
-    selectGame(next);
+    selectGame(
+        next
+    );
 
 }
 
 
 function previousSelectedGame() {
 
+    if (
+        carouselLocked
+    ) {
+        return;
+    }
+
+
     const previous =
         (
             selectedGameIndex -
             1 +
             APX_GAMES.length
-        ) % APX_GAMES.length;
+        ) %
+        APX_GAMES.length;
 
 
-    selectGame(previous);
+    selectGame(
+        previous
+    );
 
 }
 
@@ -874,17 +1179,22 @@ function updateGameInformation() {
     heroGameTitle.textContent =
         game.title;
 
+
     heroGameDescription.textContent =
         game.description;
+
 
     hubGameTitle.textContent =
         game.title;
 
+
     continueTitle.textContent =
         game.title;
 
+
     aboutGameText.textContent =
         game.description;
+
 
     genreTag.textContent =
         game.genre;
@@ -940,6 +1250,14 @@ function updateBackground() {
         incoming,
         game
     );
+
+
+    /*
+       Force browser to acknowledge the inactive state
+       before turning the incoming layer on.
+    */
+
+    void incoming.offsetWidth;
 
 
     incoming.classList.add(
@@ -1033,7 +1351,7 @@ function openPage(
 
 
 /* =========================================================
-   GAME HUB SCROLL
+   GAME HUB
 ========================================================= */
 
 function openGameHub() {
@@ -1084,6 +1402,7 @@ function openSearch() {
 
             searchInput.focus();
 
+
             moveFocusFrame(
                 searchInput
             );
@@ -1100,6 +1419,7 @@ function closeSearchOverlay() {
     searchOverlay.hidden =
         true;
 
+
     hideFocusFrame();
 
 }
@@ -1109,13 +1429,16 @@ function renderSearchResults(
     games
 ) {
 
-    if (!games.length) {
+    if (
+        !games.length
+    ) {
 
         searchResults.innerHTML = `
 
             <div class="search-result">
 
                 <div>
+
                     <strong>
                         No games found
                     </strong>
@@ -1123,11 +1446,13 @@ function renderSearchResults(
                     <span>
                         Try another search.
                     </span>
+
                 </div>
 
             </div>
 
         `;
+
 
         return;
 
@@ -1207,14 +1532,19 @@ function renderSearchResults(
                             index;
 
 
-                        renderCarousel();
+                        updateCarousel(
+                            false
+                        );
+
 
                         updateGameInformation();
+
 
                         updateBackground();
 
 
                         closeSearchOverlay();
+
 
                         openPage(
                             "home"
@@ -1250,11 +1580,7 @@ function renderSearchResults(
 
 
 /* =========================================================
-   APX AI RESPONSE ENGINE
-   LOCAL PROTOTYPE
-
-   Later this function is replaced by a secure
-   server call to the real AI model.
+   APX AI LOCAL RESPONSE ENGINE
 ========================================================= */
 
 function understandAPXCommand(
@@ -1267,34 +1593,42 @@ function understandAPXCommand(
             .toLowerCase();
 
 
-    if (!message) {
-
-        return {
-            text:
-                "Say something and I'll try to help.",
-            action: null
-        };
-
-    }
-
-
-    /* Greetings */
-
     if (
-        /^(hello|hi|hey|yo|sup|what's up|whats up)[!. ]*$/
-            .test(message)
+        !message
     ) {
 
         return {
+
             text:
-                "Hey! How can I help?",
-            action: null
+                "Say something and I'll try to help.",
+
+            action:
+                null
+
         };
 
     }
 
 
-    /* Thanks */
+    if (
+        /^(hello|hi|hey|yo|sup|what's up|whats up)[!. ]*$/
+            .test(
+                message
+            )
+    ) {
+
+        return {
+
+            text:
+                "Hey! How can I help?",
+
+            action:
+                null
+
+        };
+
+    }
+
 
     if (
         message.includes(
@@ -1303,20 +1637,23 @@ function understandAPXCommand(
     ) {
 
         return {
+
             text:
                 "You're welcome!",
-            action: null
+
+            action:
+                null
+
         };
 
     }
 
 
-    /* Available games */
-
     if (
         message.includes(
             "what games"
         ) ||
+
         message.includes(
             "games can i"
         )
@@ -1336,15 +1673,17 @@ function understandAPXCommand(
 
 
         return {
+
             text:
                 `Right now your APX Library includes ${names}.`,
-            action: null
+
+            action:
+                null
+
         };
 
     }
 
-
-    /* Friends */
 
     if (
         message.includes(
@@ -1353,21 +1692,24 @@ function understandAPXCommand(
     ) {
 
         return {
+
             text:
                 "Sure! Opening Friends.",
+
             action: {
+
                 type:
                     "page",
 
                 page:
                     "friends"
+
             }
+
         };
 
     }
 
-
-    /* APX AI */
 
     if (
         message.includes(
@@ -1376,125 +1718,148 @@ function understandAPXCommand(
     ) {
 
         return {
+
             text:
                 "Opening APX AI.",
+
             action: {
+
                 type:
                     "page",
 
                 page:
                     "ai"
+
             }
+
         };
 
     }
 
 
-    /* Find game */
-
     const matchedGame =
         APX_GAMES.find(
             game => {
 
-                const title =
+                return message.includes(
                     game.title
-                        .toLowerCase();
-
-
-                return (
-                    message.includes(
-                        title
-                    )
+                        .toLowerCase()
                 );
 
             }
         );
 
 
-    if (matchedGame) {
+    if (
+        matchedGame
+    ) {
 
         const wantsOpen =
             message.includes(
                 "open"
             ) ||
+
             message.includes(
                 "play"
             ) ||
+
             message.includes(
                 "launch"
             ) ||
+
             message.includes(
                 "start"
             );
 
 
-        if (wantsOpen) {
+        if (
+            wantsOpen
+        ) {
 
             return {
+
                 text:
                     `Sure! Opening ${matchedGame.title}.`,
 
                 action: {
+
                     type:
                         "game",
 
                     gameId:
                         matchedGame.id
+
                 }
+
             };
 
         }
 
 
         return {
+
             text:
                 `${matchedGame.title} is APX Ready and available in your library.`,
-            action: null
+
+            action:
+                null
+
         };
 
     }
 
 
     return {
+
         text:
             "I'm still learning. I can talk with you, open APX games, or take you to Friends.",
-        action: null
+
+        action:
+            null
+
     };
 
 }
 
 
 /* =========================================================
-   EXECUTE APX AI ACTION
+   EXECUTE AI ACTION
 ========================================================= */
 
 async function executeAIAction(
     action
 ) {
 
-    if (!action) {
+    if (
+        !action
+    ) {
         return;
     }
 
 
-    await wait(650);
+    await wait(
+        650
+    );
 
 
     if (
-        action.type === "page"
+        action.type ===
+        "page"
     ) {
 
         openPage(
             action.page
         );
 
+
         return;
 
     }
 
 
     if (
-        action.type === "game"
+        action.type ===
+        "game"
     ) {
 
         const index =
@@ -1505,7 +1870,9 @@ async function executeAIAction(
             );
 
 
-        if (index === -1) {
+        if (
+            index === -1
+        ) {
             return;
         }
 
@@ -1514,9 +1881,13 @@ async function executeAIAction(
             index;
 
 
-        renderCarousel();
+        updateCarousel(
+            false
+        );
+
 
         updateGameInformation();
+
 
         updateBackground();
 
@@ -1526,7 +1897,9 @@ async function executeAIAction(
         );
 
 
-        await wait(500);
+        await wait(
+            500
+        );
 
 
         launchGame();
@@ -1537,7 +1910,7 @@ async function executeAIAction(
 
 
 /* =========================================================
-   FULL APX AI PAGE
+   FULL APX AI
 ========================================================= */
 
 function addAIMessage(
@@ -1603,7 +1976,9 @@ async function sendAIMessage(
         rawMessage.trim();
 
 
-    if (!message) {
+    if (
+        !message
+    ) {
         return;
     }
 
@@ -1618,7 +1993,9 @@ async function sendAIMessage(
         "";
 
 
-    await wait(650);
+    await wait(
+        650
+    );
 
 
     const response =
@@ -1692,7 +2069,9 @@ async function respondQuickAI(
     message
 ) {
 
-    if (!message.trim()) {
+    if (
+        !message.trim()
+    ) {
         return;
     }
 
@@ -1716,12 +2095,9 @@ async function respondQuickAI(
     );
 
 
-    /*
-     Intentional delay so the response
-     smoothly expands after the request.
-    */
-
-    await wait(1200);
+    await wait(
+        1200
+    );
 
 
     const response =
@@ -1748,7 +2124,10 @@ async function respondQuickAI(
         response.action
     ) {
 
-        await wait(1200);
+        await wait(
+            1200
+        );
+
 
         executeAIAction(
             response.action
@@ -1863,11 +2242,14 @@ async function launchGame() {
         sessionStatus.textContent =
             status;
 
+
         sessionDescription.textContent =
             description;
 
 
-        await wait(700);
+        await wait(
+            700
+        );
 
     }
 
@@ -1888,7 +2270,7 @@ async function launchGame() {
 
 
     sessionDescription.textContent =
-        "APX v0.3 is currently the interface prototype. Real remote game streaming will be connected later.";
+        "APX v0.31 is currently the interface prototype. Real remote game streaming will be connected later.";
 
 
     sessionClose.textContent =
@@ -1898,7 +2280,7 @@ async function launchGame() {
 
 
 /* =========================================================
-   EVENT BINDINGS
+   PAGE EVENTS
 ========================================================= */
 
 document
@@ -2013,13 +2395,17 @@ searchInput.addEventListener(
 
                     game.title
                         .toLowerCase()
-                        .includes(query)
+                        .includes(
+                            query
+                        )
 
                     ||
 
                     game.genre
                         .toLowerCase()
-                        .includes(query)
+                        .includes(
+                            query
+                        )
             );
 
 
@@ -2115,8 +2501,11 @@ quickAICard.addEventListener(
 
 
             setTimeout(
-                () =>
-                    quickAIInput.focus(),
+                () => {
+
+                    quickAIInput.focus();
+
+                },
                 100
             );
 
@@ -2136,6 +2525,7 @@ sessionClose.addEventListener(
 
         sessionOverlay.hidden =
             true;
+
 
         hideFocusFrame();
 
@@ -2157,15 +2547,13 @@ document.addEventListener(
 
         const typing =
             target.tagName === "INPUT" ||
-            target.tagName === "TEXTAREA";
+            target.tagName === "TEXTAREA" ||
+            target.isContentEditable;
 
-
-        /*
-         Escape
-        */
 
         if (
-            event.key === "Escape"
+            event.key ===
+            "Escape"
         ) {
 
             if (
@@ -2206,22 +2594,27 @@ document.addEventListener(
         }
 
 
-        if (typing) {
+        if (
+            typing
+        ) {
             return;
         }
 
 
         /*
-         Quick APX AI
+           A = Quick APX AI
         */
 
         if (
-            event.key.toLowerCase() === "a"
+            event.key.toLowerCase() ===
+            "a"
         ) {
 
             event.preventDefault();
 
+
             openQuickAI();
+
 
             return;
 
@@ -2229,7 +2622,7 @@ document.addEventListener(
 
 
         /*
-         Home carousel navigation
+           HOME CAROUSEL
         */
 
         if (
@@ -2245,6 +2638,7 @@ document.addEventListener(
 
                 event.preventDefault();
 
+
                 nextSelectedGame();
 
             }
@@ -2257,6 +2651,7 @@ document.addEventListener(
 
                 event.preventDefault();
 
+
                 previousSelectedGame();
 
             }
@@ -2268,19 +2663,132 @@ document.addEventListener(
 
 
 /* =========================================================
+   TOUCH SWIPE
+
+   Useful for the iPad test you're doing right now.
+========================================================= */
+
+let carouselTouchStartX =
+    null;
+
+
+gameCarousel.addEventListener(
+    "touchstart",
+    event => {
+
+        carouselTouchStartX =
+            event.touches[0]
+                .clientX;
+
+    },
+    {
+        passive: true
+    }
+);
+
+
+gameCarousel.addEventListener(
+    "touchend",
+    event => {
+
+        if (
+            carouselTouchStartX ===
+            null
+        ) {
+            return;
+        }
+
+
+        const endX =
+            event.changedTouches[0]
+                .clientX;
+
+
+        const difference =
+            endX -
+            carouselTouchStartX;
+
+
+        carouselTouchStartX =
+            null;
+
+
+        if (
+            Math.abs(
+                difference
+            ) < 45
+        ) {
+            return;
+        }
+
+
+        if (
+            difference < 0
+        ) {
+
+            nextSelectedGame();
+
+        }
+
+        else {
+
+            previousSelectedGame();
+
+        }
+
+    },
+    {
+        passive: true
+    }
+);
+
+
+/* =========================================================
+   RESIZE CAROUSEL
+========================================================= */
+
+window.addEventListener(
+    "resize",
+    () => {
+
+        updateCarousel(
+            false
+        );
+
+    }
+);
+
+
+/* =========================================================
    INITIALIZE
 ========================================================= */
 
 function initAPX() {
 
-    renderCarousel();
+    /*
+       Build cards once.
+    */
+
+    createCarousel();
+
+
+    /*
+       Position them immediately.
+    */
+
+    updateCarousel(
+        false
+    );
+
 
     updateGameInformation();
+
 
     applyBackgroundTheme(
         backgroundOne,
         getSelectedGame()
     );
+
 
     backgroundOne.classList.add(
         "active"
