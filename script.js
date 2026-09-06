@@ -1,13 +1,20 @@
 /* =========================================================
-   APX CLOUD GAMING
-   CONSOLE UI v0.2
+   APX v0.3
+   SYSTEM UI
 ========================================================= */
 
 
 /* =========================================================
-   TEMPORARY CLOUD LIBRARY
+   TEMPORARY APX LIBRARY
 
-   Later this comes from the REAL Apex Games Library.
+   Later:
+   Apex Games account
+       ↓
+   owned games
+       ↓
+   APX compatibility
+       ↓
+   this interface
 ========================================================= */
 
 const APX_GAMES = [
@@ -24,9 +31,9 @@ const APX_GAMES = [
         genre: "Action",
 
         description:
-            "Enter the Apex Games ecosystem through the cloud with the official demonstration experience.",
+            "Enter the Apex Games ecosystem through APX with the official demonstration experience.",
 
-        accent: "blue",
+        theme: "blue",
 
         cloudReady: true
     },
@@ -46,7 +53,27 @@ const APX_GAMES = [
         description:
             "An upcoming Apex Games adventure currently in development.",
 
-        accent: "dark",
+        theme: "dark",
+
+        cloudReady: true
+    },
+
+
+    {
+        id: "future-game",
+
+        title: "Future Game",
+
+        artTitle: "COMING SOON",
+
+        developer: "Apex Games",
+
+        genre: "Coming Soon",
+
+        description:
+            "More APX-compatible games will appear here as your Apex Games Library grows.",
+
+        theme: "blue",
 
         cloudReady: true
     }
@@ -54,183 +81,249 @@ const APX_GAMES = [
 ];
 
 
-let selectedIndex = 0;
+let selectedGameIndex = 0;
 
-let currentScreen = "games";
+let activePage = "home";
 
-let sessionCancelled = false;
+let backgroundLayer = 1;
+
+let quickAITimer = null;
 
 
 /* =========================================================
    ELEMENTS
 ========================================================= */
 
+const focusFrame =
+    document.getElementById(
+        "apxFocusFrame"
+    );
+
 const bootScreen =
-    document.getElementById("bootScreen");
+    document.getElementById(
+        "bootScreen"
+    );
 
-const bootStatus =
-    document.getElementById("bootStatus");
+const bootText =
+    document.getElementById(
+        "bootText"
+    );
 
-const gameBackground =
-    document.getElementById("gameBackground");
+const backgroundOne =
+    document.getElementById(
+        "backgroundOne"
+    );
 
-const selectedEyebrow =
-    document.getElementById("selectedEyebrow");
+const backgroundTwo =
+    document.getElementById(
+        "backgroundTwo"
+    );
 
-const selectedTitle =
-    document.getElementById("selectedTitle");
+const selectedGameCopy =
+    document.querySelector(
+        ".selected-game-copy"
+    );
 
-const selectedDescription =
-    document.getElementById("selectedDescription");
+const heroGameTitle =
+    document.getElementById(
+        "heroGameTitle"
+    );
 
-const selectedGenre =
-    document.getElementById("selectedGenre");
-
-const selectedDeveloper =
-    document.getElementById("selectedDeveloper");
-
-const playButton =
-    document.getElementById("playButton");
-
-const detailsButton =
-    document.getElementById("detailsButton");
+const heroGameDescription =
+    document.getElementById(
+        "heroGameDescription"
+    );
 
 const gameCarousel =
-    document.getElementById("gameCarousel");
+    document.getElementById(
+        "gameCarousel"
+    );
 
 const previousGame =
-    document.getElementById("previousGame");
+    document.getElementById(
+        "previousGame"
+    );
 
 const nextGame =
-    document.getElementById("nextGame");
+    document.getElementById(
+        "nextGame"
+    );
 
-const carouselCurrent =
-    document.getElementById("carouselCurrent");
+const playGameButton =
+    document.getElementById(
+        "playGameButton"
+    );
 
-const carouselTotal =
-    document.getElementById("carouselTotal");
+const gameInfoButton =
+    document.getElementById(
+        "gameInfoButton"
+    );
 
-const libraryGrid =
-    document.getElementById("libraryGrid");
+const scrollHint =
+    document.getElementById(
+        "scrollHint"
+    );
 
-const detailsOverlay =
-    document.getElementById("detailsOverlay");
+const gameHub =
+    document.getElementById(
+        "gameHub"
+    );
 
-const closeDetails =
-    document.getElementById("closeDetails");
+const returnToGames =
+    document.getElementById(
+        "returnToGames"
+    );
 
-const detailsTitle =
-    document.getElementById("detailsTitle");
+const hubGameTitle =
+    document.getElementById(
+        "hubGameTitle"
+    );
 
-const detailsDescription =
-    document.getElementById("detailsDescription");
+const continueTitle =
+    document.getElementById(
+        "continueTitle"
+    );
 
-const detailsDeveloper =
-    document.getElementById("detailsDeveloper");
+const aboutGameText =
+    document.getElementById(
+        "aboutGameText"
+    );
 
-const detailsGenre =
-    document.getElementById("detailsGenre");
+const genreTag =
+    document.getElementById(
+        "genreTag"
+    );
 
-const detailsPlayButton =
-    document.getElementById("detailsPlayButton");
+const continueButton =
+    document.getElementById(
+        "continueButton"
+    );
 
-const searchButton =
-    document.getElementById("searchButton");
-
-const searchOverlay =
-    document.getElementById("searchOverlay");
-
-const closeSearch =
-    document.getElementById("closeSearch");
-
-const searchInput =
-    document.getElementById("searchInput");
-
-const searchResults =
-    document.getElementById("searchResults");
-
-const aiTopButton =
-    document.getElementById("aiTopButton");
-
-const aiOverlay =
-    document.getElementById("aiOverlay");
-
-const closeAI =
-    document.getElementById("closeAI");
+const aiConversation =
+    document.getElementById(
+        "aiConversation"
+    );
 
 const aiForm =
-    document.getElementById("aiForm");
+    document.getElementById(
+        "aiForm"
+    );
 
 const aiInput =
-    document.getElementById("aiInput");
+    document.getElementById(
+        "aiInput"
+    );
 
-const aiHeading =
-    document.getElementById("aiHeading");
+const searchButton =
+    document.getElementById(
+        "searchButton"
+    );
 
-const aiResponse =
-    document.getElementById("aiResponse");
+const searchOverlay =
+    document.getElementById(
+        "searchOverlay"
+    );
 
-const aiOrb =
-    document.getElementById("aiOrb");
+const closeSearch =
+    document.getElementById(
+        "closeSearch"
+    );
+
+const searchInput =
+    document.getElementById(
+        "searchInput"
+    );
+
+const searchResults =
+    document.getElementById(
+        "searchResults"
+    );
+
+const quickAI =
+    document.getElementById(
+        "quickAI"
+    );
+
+const quickAICard =
+    document.getElementById(
+        "quickAICard"
+    );
+
+const quickAIText =
+    document.getElementById(
+        "quickAIText"
+    );
+
+const quickAIForm =
+    document.getElementById(
+        "quickAIForm"
+    );
+
+const quickAIInput =
+    document.getElementById(
+        "quickAIInput"
+    );
 
 const sessionOverlay =
-    document.getElementById("sessionOverlay");
+    document.getElementById(
+        "sessionOverlay"
+    );
 
-const sessionGameTitle =
-    document.getElementById("sessionGameTitle");
+const sessionTitle =
+    document.getElementById(
+        "sessionTitle"
+    );
 
-const sessionLoader =
-    document.getElementById("sessionLoader");
+const sessionSpinner =
+    document.getElementById(
+        "sessionSpinner"
+    );
 
 const sessionStatus =
-    document.getElementById("sessionStatus");
+    document.getElementById(
+        "sessionStatus"
+    );
 
-const sessionMessage =
-    document.getElementById("sessionMessage");
+const sessionDescription =
+    document.getElementById(
+        "sessionDescription"
+    );
 
-const cancelSession =
-    document.getElementById("cancelSession");
+const sessionClose =
+    document.getElementById(
+        "sessionClose"
+    );
 
-const settingsButton =
-    document.getElementById("settingsButton");
+const clockTime =
+    document.getElementById(
+        "clockTime"
+    );
 
-const settingsOverlay =
-    document.getElementById("settingsOverlay");
-
-const closeSettings =
-    document.getElementById("closeSettings");
-
-const systemTime =
-    document.getElementById("systemTime");
-
-const systemDate =
-    document.getElementById("systemDate");
+const clockDate =
+    document.getElementById(
+        "clockDate"
+    );
 
 
 /* =========================================================
    HELPERS
 ========================================================= */
 
-function wait(milliseconds) {
+function wait(ms) {
 
     return new Promise(
         resolve =>
-            setTimeout(resolve, milliseconds)
+            setTimeout(resolve, ms)
     );
 
 }
 
 
-function currentGame() {
+function getSelectedGame() {
 
-    return APX_GAMES[selectedIndex];
-
-}
-
-
-function padNumber(number) {
-
-    return String(number).padStart(2, "0");
+    return APX_GAMES[
+        selectedGameIndex
+    ];
 
 }
 
@@ -241,23 +334,38 @@ function padNumber(number) {
 
 async function bootAPX() {
 
-    const steps = [
+    const states = [
 
-        ["Starting APX", 500],
+        [
+            "Starting APX",
+            450
+        ],
 
-        ["Connecting to Apex Games", 550],
+        [
+            "Connecting to Apex Games",
+            500
+        ],
 
-        ["Loading Cloud Library", 550],
+        [
+            "Loading your APX experience",
+            550
+        ],
 
-        ["APX Ready", 350]
+        [
+            "Ready",
+            300
+        ]
 
     ];
 
 
-    for (const [message, delay] of steps) {
+    for (
+        const [text, delay]
+        of states
+    ) {
 
-        bootStatus.textContent =
-            message;
+        bootText.textContent =
+            text;
 
         await wait(delay);
 
@@ -265,7 +373,7 @@ async function bootAPX() {
 
 
     bootScreen.classList.add(
-        "complete"
+        "finished"
     );
 
 }
@@ -281,7 +389,7 @@ function updateClock() {
         new Date();
 
 
-    systemTime.textContent =
+    clockTime.textContent =
         now.toLocaleTimeString(
             [],
             {
@@ -291,7 +399,7 @@ function updateClock() {
         );
 
 
-    systemDate.textContent =
+    clockDate.textContent =
         now.toLocaleDateString(
             [],
             {
@@ -304,113 +412,358 @@ function updateClock() {
 
 
 /* =========================================================
-   GAME TILE
+   UNIVERSAL APX FOCUS SYSTEM
 ========================================================= */
 
-function gameTileHTML(
-    game,
-    index
+function moveFocusFrame(
+    element
 ) {
 
-    const selected =
-        index === selectedIndex
-            ? "selected"
-            : "";
+    if (
+        !element ||
+        element.offsetParent === null
+    ) {
 
-    const dark =
-        game.accent === "dark"
-            ? "dark"
-            : "";
+        hideFocusFrame();
 
+        return;
 
-    return `
-
-        <article
-            class="game-tile ${selected} ${dark}"
-            data-game-index="${index}"
-            tabindex="0"
-            aria-label="${game.title}"
-        >
-
-            <div class="tile-art">
-
-                <strong>
-                    ${game.artTitle}
-                </strong>
-
-            </div>
+    }
 
 
-            <div class="tile-footer">
+    const rect =
+        element.getBoundingClientRect();
 
-                <span>
-                    APX READY
-                </span>
 
-                <strong>
-                    ${game.title}
-                </strong>
+    const gap =
+        element.classList.contains(
+            "game-card"
+        )
+            ? 9
+            : 6;
 
-            </div>
 
-        </article>
+    const radius =
+        Number(
+            element.dataset.focusRadius
+        ) ||
 
-    `;
+        parseFloat(
+            getComputedStyle(
+                element
+            ).borderRadius
+        ) ||
+
+        18;
+
+
+    focusFrame.style.width =
+        `${rect.width + gap * 2}px`;
+
+    focusFrame.style.height =
+        `${rect.height + gap * 2}px`;
+
+    focusFrame.style.borderRadius =
+        `${radius + gap}px`;
+
+    focusFrame.style.transform =
+        `translate3d(
+            ${rect.left - gap}px,
+            ${rect.top - gap}px,
+            0
+        )`;
+
+
+    focusFrame.classList.add(
+        "visible"
+    );
 
 }
 
 
+function hideFocusFrame() {
+
+    focusFrame.classList.remove(
+        "visible"
+    );
+
+}
+
+
+function bindFocusSystem() {
+
+    document
+        .querySelectorAll(
+            ".focusable"
+        )
+        .forEach(
+            element => {
+
+                if (
+                    element.dataset.focusBound
+                ) {
+                    return;
+                }
+
+
+                element.dataset.focusBound =
+                    "true";
+
+
+                element.addEventListener(
+                    "mouseenter",
+                    () =>
+                        moveFocusFrame(
+                            element
+                        )
+                );
+
+
+                element.addEventListener(
+                    "focus",
+                    () =>
+                        moveFocusFrame(
+                            element
+                        )
+                );
+
+            }
+        );
+
+
+    document.addEventListener(
+        "mousemove",
+        event => {
+
+            if (
+                !event.target.closest(
+                    ".focusable"
+                )
+            ) {
+
+                const focused =
+                    document.activeElement;
+
+
+                if (
+                    !focused ||
+                    !focused.classList?.contains(
+                        "focusable"
+                    )
+                ) {
+
+                    hideFocusFrame();
+
+                }
+
+            }
+
+        }
+    );
+
+}
+
+
+window.addEventListener(
+    "resize",
+    () => {
+
+        const focused =
+            document.activeElement;
+
+
+        if (
+            focused?.classList?.contains(
+                "focusable"
+            )
+        ) {
+
+            moveFocusFrame(
+                focused
+            );
+
+        }
+
+    }
+);
+
+
+window.addEventListener(
+    "scroll",
+    () => {
+
+        const hovered =
+            document.querySelector(
+                ".focusable:hover"
+            );
+
+
+        if (hovered) {
+
+            moveFocusFrame(
+                hovered
+            );
+
+        }
+
+    },
+    {
+        passive: true
+    }
+);
+
+
 /* =========================================================
-   RENDER
+   CAROUSEL
 ========================================================= */
 
 function renderCarousel() {
 
     gameCarousel.innerHTML =
         APX_GAMES
-            .map(gameTileHTML)
-            .join("");
-
-
-    carouselTotal.textContent =
-        padNumber(APX_GAMES.length);
-
-
-    bindGameTiles();
-
-
-    requestAnimationFrame(
-        scrollSelectedIntoView
-    );
-
-}
-
-
-function renderLibrary() {
-
-    libraryGrid.innerHTML =
-        APX_GAMES
-            .filter(
-                game =>
-                    game.cloudReady
-            )
             .map(
-                (game) => {
+                (game, index) => {
 
-                    const realIndex =
-                        APX_GAMES.indexOf(game);
+                    let offset =
+                        index -
+                        selectedGameIndex;
 
-                    return gameTileHTML(
-                        game,
-                        realIndex
-                    );
+
+                    /*
+                     Circular carousel positioning.
+                    */
+
+                    const total =
+                        APX_GAMES.length;
+
+
+                    if (
+                        offset >
+                        total / 2
+                    ) {
+
+                        offset -= total;
+
+                    }
+
+
+                    if (
+                        offset <
+                        -total / 2
+                    ) {
+
+                        offset += total;
+
+                    }
+
+
+                    const selected =
+                        index ===
+                        selectedGameIndex;
+
+
+                    return `
+
+                        <button
+                            class="
+                                game-card
+                                focusable
+                                ${
+                                    selected
+                                        ? "selected"
+                                        : ""
+                                }
+                                ${
+                                    game.theme === "dark"
+                                        ? "dark"
+                                        : ""
+                                }
+                            "
+                            style="
+                                --offset:${offset};
+                                z-index:${
+                                    20 -
+                                    Math.abs(
+                                        offset
+                                    )
+                                };
+                            "
+                            data-game-index="${index}"
+                            data-focus-radius="26"
+                            type="button"
+                        >
+
+                            <div class="card-art">
+
+                                <strong>
+                                    ${game.artTitle}
+                                </strong>
+
+                            </div>
+
+
+                            <div class="card-bottom">
+
+                                <span>
+                                    APX READY
+                                </span>
+
+                                <strong>
+                                    ${game.title}
+                                </strong>
+
+                            </div>
+
+                        </button>
+
+                    `;
 
                 }
             )
             .join("");
 
 
-    bindGameTiles();
+    document
+        .querySelectorAll(
+            ".game-card"
+        )
+        .forEach(
+            card => {
+
+                card.addEventListener(
+                    "click",
+                    () => {
+
+                        const index =
+                            Number(
+                                card.dataset.gameIndex
+                            );
+
+
+                        if (
+                            index ===
+                            selectedGameIndex
+                        ) {
+
+                            launchGame();
+
+                            return;
+
+                        }
+
+
+                        selectGame(
+                            index
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+    bindFocusSystem();
 
 }
 
@@ -419,149 +772,59 @@ function renderLibrary() {
    SELECT GAME
 ========================================================= */
 
-function selectGame(index) {
+async function selectGame(
+    index
+) {
 
     if (
         index < 0 ||
-        index >= APX_GAMES.length
+        index >= APX_GAMES.length ||
+        index === selectedGameIndex
     ) {
         return;
     }
 
 
-    selectedIndex =
+    selectedGameCopy.classList.add(
+        "changing"
+    );
+
+
+    await wait(150);
+
+
+    selectedGameIndex =
         index;
 
 
-    updateSelectedGame();
-
     renderCarousel();
 
-    renderLibrary();
+    updateGameInformation();
 
-}
-
-
-/* =========================================================
-   UPDATE SELECTED GAME
-========================================================= */
-
-function updateSelectedGame() {
-
-    const game =
-        currentGame();
+    updateBackground();
 
 
-    selectedTitle.textContent =
-        game.title;
-
-    selectedDescription.textContent =
-        game.description;
-
-    selectedGenre.textContent =
-        game.genre;
-
-    selectedDeveloper.textContent =
-        game.developer;
+    await wait(80);
 
 
-    carouselCurrent.textContent =
-        padNumber(
-            selectedIndex + 1
-        );
-
-
-    gameBackground.classList.toggle(
-        "dark",
-        game.accent === "dark"
+    selectedGameCopy.classList.remove(
+        "changing"
     );
 
-}
-
-
-/* =========================================================
-   BIND TILES
-========================================================= */
-
-function bindGameTiles() {
-
-    document
-        .querySelectorAll(
-            ".game-tile"
-        )
-        .forEach(
-            tile => {
-
-                tile.addEventListener(
-                    "click",
-                    () => {
-
-                        const index =
-                            Number(
-                                tile.dataset.gameIndex
-                            );
-
-
-                        selectGame(index);
-
-
-                        if (
-                            tile.closest(
-                                "#libraryGrid"
-                            )
-                        ) {
-
-                            switchScreen(
-                                "games"
-                            );
-
-                        }
-
-                    }
-                );
-
-
-                tile.addEventListener(
-                    "keydown",
-                    event => {
-
-                        if (
-                            event.key === "Enter" ||
-                            event.key === " "
-                        ) {
-
-                            event.preventDefault();
-
-                            tile.click();
-
-                        }
-
-                    }
-                );
-
-            }
-        );
-
-}
-
-
-/* =========================================================
-   SCROLL SELECTED
-========================================================= */
-
-function scrollSelectedIntoView() {
 
     const selected =
-        gameCarousel.querySelector(
-            ".game-tile.selected"
+        document.querySelector(
+            ".game-card.selected"
         );
 
 
-    selected?.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "center"
-    });
+    if (selected) {
+
+        moveFocusFrame(
+            selected
+        );
+
+    }
 
 }
 
@@ -570,11 +833,11 @@ function scrollSelectedIntoView() {
    NEXT / PREVIOUS
 ========================================================= */
 
-function goNext() {
+function nextSelectedGame() {
 
     const next =
         (
-            selectedIndex + 1
+            selectedGameIndex + 1
         ) % APX_GAMES.length;
 
 
@@ -583,11 +846,11 @@ function goNext() {
 }
 
 
-function goPrevious() {
+function previousSelectedGame() {
 
     const previous =
         (
-            selectedIndex -
+            selectedGameIndex -
             1 +
             APX_GAMES.length
         ) % APX_GAMES.length;
@@ -599,89 +862,200 @@ function goPrevious() {
 
 
 /* =========================================================
-   SCREENS
+   GAME INFORMATION
 ========================================================= */
 
-function switchScreen(name) {
+function updateGameInformation() {
 
-    currentScreen =
-        name;
+    const game =
+        getSelectedGame();
+
+
+    heroGameTitle.textContent =
+        game.title;
+
+    heroGameDescription.textContent =
+        game.description;
+
+    hubGameTitle.textContent =
+        game.title;
+
+    continueTitle.textContent =
+        game.title;
+
+    aboutGameText.textContent =
+        game.description;
+
+    genreTag.textContent =
+        game.genre;
+
+}
+
+
+/* =========================================================
+   BACKGROUND CROSSFADE
+========================================================= */
+
+function applyBackgroundTheme(
+    element,
+    game
+) {
+
+    element.className =
+        "game-background";
+
+
+    if (
+        game.theme === "dark"
+    ) {
+
+        element.classList.add(
+            "dark-theme"
+        );
+
+    }
+
+}
+
+
+function updateBackground() {
+
+    const game =
+        getSelectedGame();
+
+
+    const incoming =
+        backgroundLayer === 1
+            ? backgroundTwo
+            : backgroundOne;
+
+
+    const outgoing =
+        backgroundLayer === 1
+            ? backgroundOne
+            : backgroundTwo;
+
+
+    applyBackgroundTheme(
+        incoming,
+        game
+    );
+
+
+    incoming.classList.add(
+        "active"
+    );
+
+
+    outgoing.classList.remove(
+        "active"
+    );
+
+
+    backgroundLayer =
+        backgroundLayer === 1
+            ? 2
+            : 1;
+
+}
+
+
+/* =========================================================
+   PAGE NAVIGATION
+========================================================= */
+
+function openPage(
+    pageName
+) {
+
+    activePage =
+        pageName;
 
 
     document
         .querySelectorAll(
-            ".games-screen, .secondary-screen"
+            ".system-page"
         )
         .forEach(
-            screen =>
-                screen.classList.remove(
-                    "active-screen"
-                )
+            page => {
+
+                page.classList.remove(
+                    "active-page"
+                );
+
+            }
         );
 
 
-    const screen =
+    const page =
         document.getElementById(
-            `${name}Screen`
+            `${pageName}Page`
         );
 
 
-    screen?.classList.add(
-        "active-screen"
+    page?.classList.add(
+        "active-page"
     );
 
 
     document
         .querySelectorAll(
-            ".system-nav"
+            ".nav-item"
         )
         .forEach(
             button => {
 
                 button.classList.toggle(
                     "active",
-                    button.dataset.section === name
+                    button.dataset.page ===
+                    pageName
                 );
 
             }
         );
 
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+
+    hideFocusFrame();
+
+
+    setTimeout(
+        bindFocusSystem,
+        50
+    );
+
 }
 
 
 /* =========================================================
-   DETAILS
+   GAME HUB SCROLL
 ========================================================= */
 
-function openGameDetails() {
+function openGameHub() {
 
-    const game =
-        currentGame();
-
-
-    detailsTitle.textContent =
-        game.title;
-
-    detailsDescription.textContent =
-        game.description;
-
-    detailsDeveloper.textContent =
-        game.developer;
-
-    detailsGenre.textContent =
-        game.genre;
-
-
-    detailsOverlay.hidden =
-        false;
+    gameHub.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
 
 }
 
 
-function closeGameDetails() {
+function returnHomeHero() {
 
-    detailsOverlay.hidden =
-        true;
+    document
+        .getElementById(
+            "homeHero"
+        )
+        .scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
 
 }
 
@@ -690,13 +1064,15 @@ function closeGameDetails() {
    SEARCH
 ========================================================= */
 
-function openGameSearch() {
+function openSearch() {
 
     searchOverlay.hidden =
         false;
 
+
     searchInput.value =
         "";
+
 
     renderSearchResults(
         APX_GAMES
@@ -704,23 +1080,34 @@ function openGameSearch() {
 
 
     setTimeout(
-        () =>
-            searchInput.focus(),
-        60
+        () => {
+
+            searchInput.focus();
+
+            moveFocusFrame(
+                searchInput
+            );
+
+        },
+        80
     );
 
 }
 
 
-function closeGameSearch() {
+function closeSearchOverlay() {
 
     searchOverlay.hidden =
         true;
 
+    hideFocusFrame();
+
 }
 
 
-function renderSearchResults(games) {
+function renderSearchResults(
+    games
+) {
 
     if (!games.length) {
 
@@ -729,11 +1116,13 @@ function renderSearchResults(games) {
             <div class="search-result">
 
                 <div>
-                    <h3>No games found</h3>
+                    <strong>
+                        No games found
+                    </strong>
 
-                    <p>
+                    <span>
                         Try another search.
-                    </p>
+                    </span>
                 </div>
 
             </div>
@@ -751,34 +1140,44 @@ function renderSearchResults(games) {
                 game => {
 
                     const index =
-                        APX_GAMES.indexOf(game);
+                        APX_GAMES.indexOf(
+                            game
+                        );
 
 
                     return `
 
-                        <article
-                            class="search-result"
+                        <div
+                            class="
+                                search-result
+                                focusable
+                            "
                             data-search-index="${index}"
+                            data-focus-radius="17"
+                            tabindex="0"
                         >
 
                             <div class="search-result-art">
+
                                 ${game.artTitle}
+
                             </div>
+
 
                             <div>
 
-                                <h3>
+                                <strong>
                                     ${game.title}
-                                </h3>
+                                </strong>
 
-                                <p>
+                                <span>
                                     ${game.genre}
                                     · APX Ready
-                                </p>
+                                </span>
 
                             </div>
 
-                        </article>
+                        </div>
 
                     `;
 
@@ -798,17 +1197,45 @@ function renderSearchResults(games) {
                     "click",
                     () => {
 
-                        selectGame(
+                        const index =
                             Number(
                                 result.dataset.searchIndex
-                            )
+                            );
+
+
+                        selectedGameIndex =
+                            index;
+
+
+                        renderCarousel();
+
+                        updateGameInformation();
+
+                        updateBackground();
+
+
+                        closeSearchOverlay();
+
+                        openPage(
+                            "home"
                         );
 
-                        closeGameSearch();
+                    }
+                );
 
-                        switchScreen(
-                            "games"
-                        );
+
+                result.addEventListener(
+                    "keydown",
+                    event => {
+
+                        if (
+                            event.key ===
+                            "Enter"
+                        ) {
+
+                            result.click();
+
+                        }
 
                     }
                 );
@@ -816,119 +1243,168 @@ function renderSearchResults(games) {
             }
         );
 
-}
 
-
-/* =========================================================
-   APX AI
-========================================================= */
-
-function openAPXAI() {
-
-    aiOverlay.hidden =
-        false;
-
-    aiHeading.textContent =
-        "What do you want to play?";
-
-    aiResponse.textContent =
-        'Try saying something like "Open Apex Demo."';
-
-    aiInput.value =
-        "";
-
-
-    setTimeout(
-        () =>
-            aiInput.focus(),
-        70
-    );
-
-}
-
-
-function closeAPXAI() {
-
-    aiOverlay.hidden =
-        true;
+    bindFocusSystem();
 
 }
 
 
 /* =========================================================
-   APX AI COMMAND
+   APX AI RESPONSE ENGINE
+   LOCAL PROTOTYPE
+
+   Later this function is replaced by a secure
+   server call to the real AI model.
 ========================================================= */
 
-async function processAICommand(
-    rawCommand
+function understandAPXCommand(
+    rawMessage
 ) {
 
-    const command =
-        rawCommand
+    const message =
+        rawMessage
             .trim()
             .toLowerCase();
 
 
-    if (!command) {
-        return;
+    if (!message) {
+
+        return {
+            text:
+                "Say something and I'll try to help.",
+            action: null
+        };
+
     }
 
 
-    aiHeading.textContent =
-        "APX is listening...";
-
-    aiResponse.textContent =
-        rawCommand;
-
-
-    await wait(300);
-
-
-    /* Library */
+    /* Greetings */
 
     if (
-        command.includes("library")
+        /^(hello|hi|hey|yo|sup|what's up|whats up)[!. ]*$/
+            .test(message)
     ) {
 
-        aiHeading.textContent =
-            "Sure!";
-
-        aiResponse.textContent =
-            "Opening your Apex Games Library.";
-
-
-        await wait(650);
-
-
-        closeAPXAI();
-
-        switchScreen(
-            "library"
-        );
-
-        return;
+        return {
+            text:
+                "Hey! How can I help?",
+            action: null
+        };
 
     }
 
 
-    /* Find matching game */
+    /* Thanks */
+
+    if (
+        message.includes(
+            "thank"
+        )
+    ) {
+
+        return {
+            text:
+                "You're welcome!",
+            action: null
+        };
+
+    }
+
+
+    /* Available games */
+
+    if (
+        message.includes(
+            "what games"
+        ) ||
+        message.includes(
+            "games can i"
+        )
+    ) {
+
+        const names =
+            APX_GAMES
+                .filter(
+                    game =>
+                        game.cloudReady
+                )
+                .map(
+                    game =>
+                        game.title
+                )
+                .join(", ");
+
+
+        return {
+            text:
+                `Right now your APX Library includes ${names}.`,
+            action: null
+        };
+
+    }
+
+
+    /* Friends */
+
+    if (
+        message.includes(
+            "friends"
+        )
+    ) {
+
+        return {
+            text:
+                "Sure! Opening Friends.",
+            action: {
+                type:
+                    "page",
+
+                page:
+                    "friends"
+            }
+        };
+
+    }
+
+
+    /* APX AI */
+
+    if (
+        message.includes(
+            "open apx ai"
+        )
+    ) {
+
+        return {
+            text:
+                "Opening APX AI.",
+            action: {
+                type:
+                    "page",
+
+                page:
+                    "ai"
+            }
+        };
+
+    }
+
+
+    /* Find game */
 
     const matchedGame =
         APX_GAMES.find(
             game => {
 
                 const title =
-                    game.title.toLowerCase();
+                    game.title
+                        .toLowerCase();
 
 
                 return (
-                    command.includes(title) ||
-                    title
-                        .split(" ")
-                        .every(
-                            word =>
-                                command.includes(word)
-                        )
+                    message.includes(
+                        title
+                    )
                 );
 
             }
@@ -937,195 +1413,587 @@ async function processAICommand(
 
     if (matchedGame) {
 
-        const index =
-            APX_GAMES.indexOf(
-                matchedGame
+        const wantsOpen =
+            message.includes(
+                "open"
+            ) ||
+            message.includes(
+                "play"
+            ) ||
+            message.includes(
+                "launch"
+            ) ||
+            message.includes(
+                "start"
             );
 
 
-        aiHeading.textContent =
-            "Sure!";
+        if (wantsOpen) {
 
-        aiResponse.textContent =
-            `Opening ${matchedGame.title}.`;
+            return {
+                text:
+                    `Sure! Opening ${matchedGame.title}.`,
 
+                action: {
+                    type:
+                        "game",
 
-        await wait(700);
+                    gameId:
+                        matchedGame.id
+                }
+            };
 
-
-        selectGame(index);
-
-        switchScreen(
-            "games"
-        );
-
-
-        await wait(300);
+        }
 
 
-        closeAPXAI();
-
-
-        await wait(300);
-
-
-        launchCloudSession();
-
-        return;
+        return {
+            text:
+                `${matchedGame.title} is APX Ready and available in your library.`,
+            action: null
+        };
 
     }
 
 
-    /* Unknown */
-
-    aiHeading.textContent =
-        "I couldn't find that game.";
-
-    aiResponse.textContent =
-        "Try asking me to open a game that's currently in your APX Library.";
+    return {
+        text:
+            "I'm still learning. I can talk with you, open APX games, or take you to Friends.",
+        action: null
+    };
 
 }
 
 
 /* =========================================================
-   CLOUD SESSION
-
-   UI PROTOTYPE ONLY.
-   DOES NOT CLAIM A REAL SERVER EXISTS.
+   EXECUTE APX AI ACTION
 ========================================================= */
 
-async function launchCloudSession() {
+async function executeAIAction(
+    action
+) {
 
-    sessionCancelled =
+    if (!action) {
+        return;
+    }
+
+
+    await wait(650);
+
+
+    if (
+        action.type === "page"
+    ) {
+
+        openPage(
+            action.page
+        );
+
+        return;
+
+    }
+
+
+    if (
+        action.type === "game"
+    ) {
+
+        const index =
+            APX_GAMES.findIndex(
+                game =>
+                    game.id ===
+                    action.gameId
+            );
+
+
+        if (index === -1) {
+            return;
+        }
+
+
+        selectedGameIndex =
+            index;
+
+
+        renderCarousel();
+
+        updateGameInformation();
+
+        updateBackground();
+
+
+        openPage(
+            "home"
+        );
+
+
+        await wait(500);
+
+
+        launchGame();
+
+    }
+
+}
+
+
+/* =========================================================
+   FULL APX AI PAGE
+========================================================= */
+
+function addAIMessage(
+    sender,
+    text
+) {
+
+    const wrapper =
+        document.createElement(
+            "div"
+        );
+
+
+    wrapper.className =
+        `ai-message ${
+            sender === "user"
+                ? "user-message"
+                : "assistant-message"
+        }`;
+
+
+    const name =
+        sender === "user"
+            ? "YOU"
+            : "APX AI";
+
+
+    wrapper.innerHTML = `
+
+        <div class="message-name">
+            ${name}
+        </div>
+
+        <div class="message-bubble"></div>
+
+    `;
+
+
+    wrapper
+        .querySelector(
+            ".message-bubble"
+        )
+        .textContent =
+            text;
+
+
+    aiConversation.appendChild(
+        wrapper
+    );
+
+
+    aiConversation.scrollTop =
+        aiConversation.scrollHeight;
+
+}
+
+
+async function sendAIMessage(
+    rawMessage
+) {
+
+    const message =
+        rawMessage.trim();
+
+
+    if (!message) {
+        return;
+    }
+
+
+    addAIMessage(
+        "user",
+        message
+    );
+
+
+    aiInput.value =
+        "";
+
+
+    await wait(650);
+
+
+    const response =
+        understandAPXCommand(
+            message
+        );
+
+
+    addAIMessage(
+        "assistant",
+        response.text
+    );
+
+
+    executeAIAction(
+        response.action
+    );
+
+}
+
+
+/* =========================================================
+   QUICK APX AI
+========================================================= */
+
+function openQuickAI() {
+
+    clearTimeout(
+        quickAITimer
+    );
+
+
+    quickAI.className =
+        "quick-ai visible";
+
+
+    quickAIText.textContent =
+        "Listening...";
+
+
+    moveFocusFrame(
+        quickAICard
+    );
+
+
+    requestAnimationFrame(
+        () => {
+
+            quickAI.classList.add(
+                "listening",
+                "input-open"
+            );
+
+        }
+    );
+
+
+    setTimeout(
+        () => {
+
+            quickAIInput.focus();
+
+        },
+        350
+    );
+
+}
+
+
+async function respondQuickAI(
+    message
+) {
+
+    if (!message.trim()) {
+        return;
+    }
+
+
+    quickAI.classList.remove(
+        "input-open"
+    );
+
+
+    quickAI.classList.add(
+        "listening"
+    );
+
+
+    quickAIText.textContent =
+        "Thinking...";
+
+
+    moveFocusFrame(
+        quickAICard
+    );
+
+
+    /*
+     Intentional delay so the response
+     smoothly expands after the request.
+    */
+
+    await wait(1200);
+
+
+    const response =
+        understandAPXCommand(
+            message
+        );
+
+
+    quickAI.classList.add(
+        "expanded"
+    );
+
+
+    quickAIText.textContent =
+        response.text;
+
+
+    moveFocusFrame(
+        quickAICard
+    );
+
+
+    if (
+        response.action
+    ) {
+
+        await wait(1200);
+
+        executeAIAction(
+            response.action
+        );
+
+    }
+
+
+    quickAITimer =
+        setTimeout(
+            closeQuickAI,
+            5500
+        );
+
+}
+
+
+function closeQuickAI() {
+
+    quickAI.className =
+        "quick-ai";
+
+
+    quickAIInput.value =
+        "";
+
+
+    if (
+        document.activeElement ===
+        quickAIInput
+    ) {
+
+        quickAIInput.blur();
+
+    }
+
+
+    hideFocusFrame();
+
+}
+
+
+/* =========================================================
+   CLOUD SESSION PROTOTYPE
+========================================================= */
+
+async function launchGame() {
+
+    const game =
+        getSelectedGame();
+
+
+    sessionTitle.textContent =
+        game.title;
+
+
+    sessionStatus.textContent =
+        "Preparing your session...";
+
+
+    sessionDescription.textContent =
+        "Checking your Apex Games Library.";
+
+
+    sessionSpinner.hidden =
         false;
 
 
-    const game =
-        currentGame();
+    sessionClose.textContent =
+        "Cancel";
 
 
     sessionOverlay.hidden =
         false;
 
-    sessionGameTitle.textContent =
-        game.title;
 
-    sessionLoader.hidden =
-        false;
-
-    cancelSession.textContent =
-        "Cancel";
+    hideFocusFrame();
 
 
-    const states = [
+    const steps = [
 
         [
-            "Checking your Apex Games Library...",
-            "Confirming access to this title."
+            "Checking game access...",
+            "Confirming this title in your Apex Games Library."
         ],
 
         [
             "Checking APX compatibility...",
-            "Preparing the cloud gaming experience."
+            "This game is marked APX Ready."
         ],
 
         [
-            "Looking for an APX session...",
-            "Cloud streaming infrastructure is currently a prototype."
+            "Looking for an APX cloud session...",
+            "Preparing the APX experience."
         ]
 
     ];
 
 
-    for (const state of states) {
+    for (
+        const [status, description]
+        of steps
+    ) {
 
-        if (sessionCancelled) {
+        if (
+            sessionOverlay.hidden
+        ) {
             return;
         }
 
 
         sessionStatus.textContent =
-            state[0];
+            status;
 
-        sessionMessage.textContent =
-            state[1];
+        sessionDescription.textContent =
+            description;
 
 
-        await wait(850);
+        await wait(700);
 
     }
 
 
-    if (sessionCancelled) {
+    if (
+        sessionOverlay.hidden
+    ) {
         return;
     }
 
 
-    sessionLoader.hidden =
+    sessionSpinner.hidden =
         true;
 
 
     sessionStatus.textContent =
-        "APX streaming isn't connected yet.";
+        "Cloud streaming isn't connected yet.";
 
-    sessionMessage.textContent =
-        "This is the APX v0.2 interface prototype. Real remote game streaming will be connected in a future version.";
 
-    cancelSession.textContent =
+    sessionDescription.textContent =
+        "APX v0.3 is currently the interface prototype. Real remote game streaming will be connected later.";
+
+
+    sessionClose.textContent =
         "Return to APX";
 
 }
 
 
 /* =========================================================
-   EVENTS
+   EVENT BINDINGS
 ========================================================= */
+
+document
+    .querySelectorAll(
+        ".nav-item"
+    )
+    .forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    openPage(
+                        button.dataset.page
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "logoButton"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            openPage(
+                "home"
+            );
+
+        }
+    );
+
 
 previousGame.addEventListener(
     "click",
-    goPrevious
+    previousSelectedGame
 );
 
 
 nextGame.addEventListener(
     "click",
-    goNext
+    nextSelectedGame
 );
 
 
-playButton.addEventListener(
+playGameButton.addEventListener(
     "click",
-    launchCloudSession
+    launchGame
 );
 
 
-detailsButton.addEventListener(
+continueButton.addEventListener(
     "click",
-    openGameDetails
+    launchGame
 );
 
 
-detailsPlayButton.addEventListener(
+gameInfoButton.addEventListener(
     "click",
-    launchCloudSession
+    openGameHub
 );
 
 
-closeDetails.addEventListener(
+scrollHint.addEventListener(
     "click",
-    closeGameDetails
+    openGameHub
 );
 
+
+returnToGames.addEventListener(
+    "click",
+    returnHomeHero
+);
+
+
+/* =========================================================
+   SEARCH EVENTS
+========================================================= */
 
 searchButton.addEventListener(
     "click",
-    openGameSearch
+    openSearch
 );
 
 
 closeSearch.addEventListener(
     "click",
-    closeGameSearch
+    closeSearchOverlay
 );
 
 
@@ -1139,12 +2007,15 @@ searchInput.addEventListener(
                 .toLowerCase();
 
 
-        const games =
+        const matches =
             APX_GAMES.filter(
                 game =>
+
                     game.title
                         .toLowerCase()
-                        .includes(query) ||
+                        .includes(query)
+
+                    ||
 
                     game.genre
                         .toLowerCase()
@@ -1153,24 +2024,16 @@ searchInput.addEventListener(
 
 
         renderSearchResults(
-            games
+            matches
         );
 
     }
 );
 
 
-aiTopButton.addEventListener(
-    "click",
-    openAPXAI
-);
-
-
-closeAI.addEventListener(
-    "click",
-    closeAPXAI
-);
-
+/* =========================================================
+   FULL AI EVENTS
+========================================================= */
 
 aiForm.addEventListener(
     "submit",
@@ -1178,7 +2041,8 @@ aiForm.addEventListener(
 
         event.preventDefault();
 
-        processAICommand(
+
+        sendAIMessage(
             aiInput.value
         );
 
@@ -1188,7 +2052,7 @@ aiForm.addEventListener(
 
 document
     .querySelectorAll(
-        "[data-ai-command]"
+        ".ai-suggestion"
     )
     .forEach(
         button => {
@@ -1197,179 +2061,203 @@ document
                 "click",
                 () => {
 
-                    const command =
-                        button.dataset.aiCommand;
-
-
-                    aiInput.value =
-                        command;
-
-
-                    processAICommand(
-                        command
+                    sendAIMessage(
+                        button.dataset.command
                     );
 
                 }
             );
 
         }
-    );
-
-
-cancelSession.addEventListener(
-    "click",
-    () => {
-
-        sessionCancelled =
-            true;
-
-        sessionOverlay.hidden =
-            true;
-
-    }
-);
-
-
-settingsButton.addEventListener(
-    "click",
-    () => {
-
-        settingsOverlay.hidden =
-            false;
-
-    }
-);
-
-
-closeSettings.addEventListener(
-    "click",
-    () => {
-
-        settingsOverlay.hidden =
-            true;
-
-    }
-);
-
-
-document
-    .querySelectorAll(
-        ".system-nav"
-    )
-    .forEach(
-        button => {
-
-            button.addEventListener(
-                "click",
-                () => {
-
-                    switchScreen(
-                        button.dataset.section
-                    );
-
-                }
-            );
-
-        }
-    );
-
-
-document
-    .getElementById(
-        "apxHomeButton"
-    )
-    .addEventListener(
-        "click",
-        () =>
-            switchScreen(
-                "games"
-            )
     );
 
 
 /* =========================================================
-   KEYBOARD / CONSOLE-LIKE NAVIGATION
+   QUICK AI EVENTS
+========================================================= */
+
+quickAIForm.addEventListener(
+    "submit",
+    event => {
+
+        event.preventDefault();
+
+
+        const message =
+            quickAIInput.value;
+
+
+        quickAIInput.value =
+            "";
+
+
+        respondQuickAI(
+            message
+        );
+
+    }
+);
+
+
+quickAICard.addEventListener(
+    "click",
+    () => {
+
+        if (
+            !quickAI.classList.contains(
+                "input-open"
+            )
+        ) {
+
+            quickAI.classList.add(
+                "input-open"
+            );
+
+
+            setTimeout(
+                () =>
+                    quickAIInput.focus(),
+                100
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   SESSION
+========================================================= */
+
+sessionClose.addEventListener(
+    "click",
+    () => {
+
+        sessionOverlay.hidden =
+            true;
+
+        hideFocusFrame();
+
+    }
+);
+
+
+/* =========================================================
+   KEYBOARD / FUTURE CONTROLLER FOUNDATION
 ========================================================= */
 
 document.addEventListener(
     "keydown",
     event => {
 
-        const overlayOpen =
-            !detailsOverlay.hidden ||
-            !searchOverlay.hidden ||
-            !aiOverlay.hidden ||
-            !sessionOverlay.hidden ||
-            !settingsOverlay.hidden;
+        const target =
+            event.target;
 
+
+        const typing =
+            target.tagName === "INPUT" ||
+            target.tagName === "TEXTAREA";
+
+
+        /*
+         Escape
+        */
 
         if (
             event.key === "Escape"
         ) {
 
-            closeGameDetails();
+            if (
+                !searchOverlay.hidden
+            ) {
 
-            closeGameSearch();
+                closeSearchOverlay();
 
-            closeAPXAI();
+                return;
 
-            settingsOverlay.hidden =
-                true;
+            }
 
-            return;
+
+            if (
+                !sessionOverlay.hidden
+            ) {
+
+                sessionOverlay.hidden =
+                    true;
+
+                return;
+
+            }
+
+
+            if (
+                quickAI.classList.contains(
+                    "visible"
+                )
+            ) {
+
+                closeQuickAI();
+
+                return;
+
+            }
 
         }
 
 
-        if (overlayOpen) {
+        if (typing) {
             return;
         }
 
+
+        /*
+         Quick APX AI
+        */
 
         if (
-            currentScreen === "games"
+            event.key.toLowerCase() === "a"
+        ) {
+
+            event.preventDefault();
+
+            openQuickAI();
+
+            return;
+
+        }
+
+
+        /*
+         Home carousel navigation
+        */
+
+        if (
+            activePage === "home" &&
+            window.scrollY <
+            window.innerHeight * .55
         ) {
 
             if (
-                event.key === "ArrowRight"
+                event.key ===
+                "ArrowRight"
             ) {
 
                 event.preventDefault();
 
-                goNext();
+                nextSelectedGame();
 
             }
 
 
             if (
-                event.key === "ArrowLeft"
+                event.key ===
+                "ArrowLeft"
             ) {
 
                 event.preventDefault();
 
-                goPrevious();
-
-            }
-
-
-            if (
-                event.key === "Enter"
-            ) {
-
-                event.preventDefault();
-
-                launchCloudSession();
-
-            }
-
-
-            if (
-                event.key.toLowerCase() === "a"
-            ) {
-
-                event.preventDefault();
-
-                openAPXAI();
+                previousSelectedGame();
 
             }
 
@@ -1380,22 +2268,24 @@ document.addEventListener(
 
 
 /* =========================================================
-   START
+   INITIALIZE
 ========================================================= */
 
 function initAPX() {
 
-    carouselTotal.textContent =
-        padNumber(
-            APX_GAMES.length
-        );
-
-
     renderCarousel();
 
-    renderLibrary();
+    updateGameInformation();
 
-    updateSelectedGame();
+    applyBackgroundTheme(
+        backgroundOne,
+        getSelectedGame()
+    );
+
+    backgroundOne.classList.add(
+        "active"
+    );
+
 
     updateClock();
 
@@ -1404,6 +2294,9 @@ function initAPX() {
         updateClock,
         30000
     );
+
+
+    bindFocusSystem();
 
 
     bootAPX();
