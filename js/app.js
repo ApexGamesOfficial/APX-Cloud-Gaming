@@ -1,12 +1,14 @@
 /* =========================================================
-   APX v0.4
+   APX v0.41
    MAIN APPLICATION BOOTSTRAP
 
-   This file connects the APX v0.4 modules and DOM.
+   Home + Store + APX ZERO integration.
 
    IMPORTANT:
-   Modules are loaded dynamically so a broken dependency
+   Modules are dynamically imported so one broken dependency
    cannot permanently trap APX on the boot screen.
+
+   APX v0.41 DOES NOT provide real cloud streaming.
 ========================================================= */
 
 
@@ -21,6 +23,8 @@ let gamesModule = null;
 let focusModule = null;
 let carouselModule = null;
 let navigationModule = null;
+let storeModule = null;
+let zeroModule = null;
 
 let clockTimer = null;
 
@@ -28,7 +32,7 @@ let currentBackgroundLayer = "current";
 
 
 /* =========================================================
-   DOM HELPERS
+   HELPERS
 ========================================================= */
 
 function getElement(id) {
@@ -43,13 +47,21 @@ function wait(ms) {
 }
 
 
+function getState() {
+
+    if (!stateModule) {
+        return null;
+    }
+
+    return stateModule.getAPXState
+        ? stateModule.getAPXState()
+        : stateModule.APXState;
+
+}
+
+
 /* =========================================================
    BOOT SCREEN
-
-   This is deliberately independent from every APX module.
-
-   Even if another module fails, this function can still
-   release the interface.
 ========================================================= */
 
 function finishBootScreen() {
@@ -74,8 +86,8 @@ function finishBootScreen() {
 
 
     /*
-       After the fade finishes, make absolutely sure the
-       boot layer cannot intercept taps/clicks.
+       Never allow the faded boot screen to continue
+       intercepting mouse/touch input.
     */
 
     window.setTimeout(
@@ -94,9 +106,10 @@ function finishBootScreen() {
 /* =========================================================
    EMERGENCY BOOT RELEASE
 
-   If something strange happens during initialization,
-   APX still gets released instead of sitting forever
-   on the logo.
+   KEEP THIS.
+
+   If a module fails during initialization APX still escapes
+   the loading screen after five seconds.
 ========================================================= */
 
 function installEmergencyBootRelease() {
@@ -126,11 +139,7 @@ function installEmergencyBootRelease() {
 
 
 /* =========================================================
-   ERROR DISPLAY
-
-   Since DevTools may not always be available during
-   tablet testing, critical APX errors can appear directly
-   inside the interface.
+   APX ERROR DISPLAY
 ========================================================= */
 
 function showAPXError(message) {
@@ -142,17 +151,13 @@ function showAPXError(message) {
 
 
     let panel =
-        getElement(
-            "apxRuntimeError"
-        );
+        getElement("apxRuntimeError");
 
 
     if (!panel) {
 
         panel =
-            document.createElement(
-                "div"
-            );
+            document.createElement("div");
 
 
         panel.id =
@@ -163,17 +168,12 @@ function showAPXError(message) {
             panel.style,
             {
 
-                position:
-                    "fixed",
+                position: "fixed",
 
-                left:
-                    "50%",
+                left: "50%",
+                bottom: "24px",
 
-                bottom:
-                    "24px",
-
-                zIndex:
-                    "999999",
+                zIndex: "999999",
 
                 width:
                     "min(620px, calc(100vw - 32px))",
@@ -226,7 +226,7 @@ function showAPXError(message) {
 
 
     panel.textContent =
-        `APX v0.4: ${message}`;
+        `APX v0.41: ${message}`;
 
 }
 
@@ -238,15 +238,10 @@ function showAPXError(message) {
 function updateClock() {
 
     const timeElement =
-        getElement(
-            "systemTime"
-        );
-
+        getElement("systemTime");
 
     const dateElement =
-        getElement(
-            "systemDate"
-        );
+        getElement("systemDate");
 
 
     if (
@@ -265,13 +260,8 @@ function updateClock() {
         now.toLocaleTimeString(
             [],
             {
-
-                hour:
-                    "numeric",
-
-                minute:
-                    "2-digit"
-
+                hour: "numeric",
+                minute: "2-digit"
             }
         );
 
@@ -280,16 +270,9 @@ function updateClock() {
         now.toLocaleDateString(
             [],
             {
-
-                weekday:
-                    "short",
-
-                month:
-                    "short",
-
-                day:
-                    "numeric"
-
+                weekday: "short",
+                month: "short",
+                day: "numeric"
             }
         );
 
@@ -301,9 +284,7 @@ function startClock() {
     updateClock();
 
 
-    if (
-        clockTimer !== null
-    ) {
+    if (clockTimer !== null) {
 
         clearInterval(
             clockTimer
@@ -322,22 +303,13 @@ function startClock() {
 
 
 /* =========================================================
-   SELECTED ITEM
+   CURRENT CAROUSEL ITEM
 ========================================================= */
 
 function getCurrentIndex() {
 
-    if (
-        !stateModule
-    ) {
-        return 0;
-    }
-
-
     const state =
-        stateModule.getAPXState
-            ? stateModule.getAPXState()
-            : stateModule.APXState;
+        getState();
 
 
     return (
@@ -351,9 +323,7 @@ function getCurrentIndex() {
 
 function getCurrentGame() {
 
-    if (
-        !gamesModule
-    ) {
+    if (!gamesModule) {
         return null;
     }
 
@@ -387,12 +357,131 @@ function getCurrentGame() {
 
 
 /* =========================================================
-   SELECTED COPY
+   ITEM TYPE HELPERS
 ========================================================= */
 
-function updateSelectedCopy(
-    game
-) {
+function isWelcome(game) {
+
+    return Boolean(
+        game &&
+        (
+            game.id === "welcome" ||
+            game.type === "welcome"
+        )
+    );
+
+}
+
+
+function isZero(game) {
+
+    return Boolean(
+        game &&
+        (
+            game.id === "apx-zero" ||
+            game.type === "subscription"
+        )
+    );
+
+}
+
+
+function isPlaceholder(game) {
+
+    return Boolean(
+        game &&
+        (
+            game.type === "placeholder" ||
+            game.id === "future-game"
+        )
+    );
+
+}
+
+
+/* =========================================================
+   HOME MODE
+
+   Welcome  -> Welcome Dashboard
+   ZERO     -> APX ZERO section
+   Game     -> Game Hub
+========================================================= */
+
+function updateHomeMode(game) {
+
+    const welcomeSelected =
+        isWelcome(game);
+
+    const zeroSelected =
+        isZero(game);
+
+
+    document.body.classList.toggle(
+        "welcome-selected",
+        welcomeSelected
+    );
+
+
+    document.body.classList.toggle(
+        "zero-selected",
+        zeroSelected
+    );
+
+
+    document.body.dataset.selectedItem =
+        game?.id ||
+        "welcome";
+
+
+    const welcomeDashboard =
+        getElement("welcomeDashboard");
+
+    const zeroSection =
+        getElement("apxZeroSection");
+
+    const gameHub =
+        getElement("gameHub");
+
+
+    /*
+       The CSS also controls these modes.
+
+       hidden is synchronized here as an additional guarantee.
+    */
+
+    if (welcomeDashboard) {
+
+        welcomeDashboard.hidden =
+            !welcomeSelected;
+
+    }
+
+
+    if (zeroSection) {
+
+        zeroSection.hidden =
+            !zeroSelected;
+
+    }
+
+
+    if (gameHub) {
+
+        gameHub.hidden =
+            welcomeSelected ||
+            zeroSelected ||
+            isPlaceholder(game);
+
+    }
+
+}
+
+
+/* =========================================================
+   SELECTED HERO COPY
+========================================================= */
+
+function updateSelectedCopy(game) {
 
     if (!game) {
         return;
@@ -400,22 +489,17 @@ function updateSelectedCopy(
 
 
     const title =
-        getElement(
-            "selectedGameTitle"
-        );
-
+        getElement("selectedGameTitle");
 
     const description =
         getElement(
             "selectedGameDescription"
         );
 
-
     const developer =
         getElement(
             "selectedGameDeveloper"
         );
-
 
     const status =
         getElement(
@@ -443,44 +527,59 @@ function updateSelectedCopy(
 
     if (developer) {
 
-        developer.textContent =
-            game.type === "welcome"
-                ? "APX"
-                : (
-                    game.developer ||
-                    "Apex Games"
-                );
+        if (isWelcome(game)) {
+
+            developer.textContent =
+                "APX";
+
+        }
+
+        else if (isZero(game)) {
+
+            developer.textContent =
+                "APX";
+
+        }
+
+        else {
+
+            developer.textContent =
+                game.developer ||
+                "Apex Games";
+
+        }
 
     }
 
 
     if (status) {
 
-        status.textContent =
-            game.status ||
-            (
-                game.apxCompatible
-                    ? "APX Ready"
-                    : "Prototype"
-            );
+        if (isZero(game)) {
+
+            status.textContent =
+                game.status ||
+                "Membership";
+
+        }
+
+        else {
+
+            status.textContent =
+                game.status ||
+                (
+                    game.apxCompatible
+                        ? "APX Ready"
+                        : "Prototype"
+                );
+
+        }
 
     }
 
 
-    const welcomeSelected =
-        game.id === "welcome" ||
-        game.type === "welcome";
-
-
-    document.body.classList.toggle(
-        "welcome-selected",
-        welcomeSelected
+    updateHomeMode(
+        game
     );
-
-
-    document.body.dataset.selectedItem =
-        game.id ||
-        "welcome";
 
 
     updateGameHub(
@@ -494,31 +593,33 @@ function updateSelectedCopy(
    GAME HUB
 ========================================================= */
 
-function updateGameHub(
-    game
-) {
+function updateGameHub(game) {
 
     if (!game) {
         return;
     }
 
 
-    const hubTitle =
-        getElement(
-            "hubGameTitle"
-        );
+    /*
+       Welcome and ZERO have their own lower sections.
+    */
 
+    if (
+        isWelcome(game) ||
+        isZero(game)
+    ) {
+        return;
+    }
+
+
+    const hubTitle =
+        getElement("hubGameTitle");
 
     const continueTitle =
-        getElement(
-            "continueGameTitle"
-        );
-
+        getElement("continueGameTitle");
 
     const hubDescription =
-        getElement(
-            "hubDescription"
-        );
+        getElement("hubDescription");
 
 
     if (hubTitle) {
@@ -546,14 +647,6 @@ function updateGameHub(
             "Game information will appear here.";
 
     }
-
-
-    /*
-       Welcome has its own dashboard.
-
-       The CSS automatically hides Game Hub whenever
-       body.welcome-selected exists.
-    */
 
 }
 
@@ -623,8 +716,8 @@ function applyBackground(
     else {
 
         /*
-           Clearing inline styling returns control to the
-           v0.4 CSS fallback themes.
+           Clearing inline styling lets style.css control
+           Welcome / ZERO / fallback themes.
         */
 
         element.style.backgroundImage =
@@ -674,7 +767,6 @@ function updateBackground(
         layers.current.style.opacity =
             "1";
 
-
         layers.next.style.opacity =
             "0";
 
@@ -708,17 +800,11 @@ function updateBackground(
         "0";
 
 
-    /*
-       Force the browser to register the inactive state
-       before crossfading.
-    */
-
     void incoming.offsetWidth;
 
 
     incoming.style.opacity =
         "1";
-
 
     outgoing.style.opacity =
         "0";
@@ -734,23 +820,16 @@ function updateBackground(
 
 
 /* =========================================================
-   PRIMARY / SECONDARY ACTIONS
+   HERO ACTION BUTTONS
 ========================================================= */
 
-function updateActionButtons(
-    game
-) {
+function updateActionButtons(game) {
 
     const primary =
-        getElement(
-            "primaryAction"
-        );
-
+        getElement("primaryAction");
 
     const secondary =
-        getElement(
-            "secondaryAction"
-        );
+        getElement("secondaryAction");
 
 
     if (
@@ -762,16 +841,14 @@ function updateActionButtons(
     }
 
 
-    const isWelcome =
-        game.id === "welcome" ||
-        game.type === "welcome";
+    /*
+       WELCOME
+    */
 
-
-    if (isWelcome) {
+    if (isWelcome(game)) {
 
         primary.disabled =
             false;
-
 
         primary.textContent =
             "Explore APX";
@@ -779,7 +856,6 @@ function updateActionButtons(
 
         secondary.disabled =
             false;
-
 
         secondary.textContent =
             "System Info";
@@ -791,8 +867,63 @@ function updateActionButtons(
 
 
     /*
-       A title existing in the carousel does NOT mean
-       real APX cloud streaming is available.
+       APX ZERO
+
+       This is a membership preview.
+       It is NOT treated as a game/session.
+    */
+
+    if (isZero(game)) {
+
+        primary.disabled =
+            false;
+
+        primary.textContent =
+            "Explore ZERO";
+
+
+        secondary.disabled =
+            false;
+
+        secondary.textContent =
+            "View Benefits";
+
+
+        return;
+
+    }
+
+
+    /*
+       PLACEHOLDER
+    */
+
+    if (isPlaceholder(game)) {
+
+        primary.disabled =
+            true;
+
+        primary.textContent =
+            game.status ||
+            "Coming Soon";
+
+
+        secondary.disabled =
+            false;
+
+        secondary.textContent =
+            "Game Info";
+
+
+        return;
+
+    }
+
+
+    /*
+       IMPORTANT:
+
+       playable does not mean APX cloud compatible.
     */
 
     if (
@@ -803,19 +934,15 @@ function updateActionButtons(
         primary.disabled =
             false;
 
-
         primary.textContent =
             "Play on APX";
 
     }
 
-    else if (
-        game.playable
-    ) {
+    else if (game.playable) {
 
         primary.disabled =
             false;
-
 
         primary.textContent =
             "Play Prototype";
@@ -827,7 +954,6 @@ function updateActionButtons(
         primary.disabled =
             true;
 
-
         primary.textContent =
             game.status ||
             "Unavailable";
@@ -838,7 +964,6 @@ function updateActionButtons(
     secondary.disabled =
         false;
 
-
     secondary.textContent =
         "Game Info";
 
@@ -846,7 +971,7 @@ function updateActionButtons(
 
 
 /* =========================================================
-   UPDATE ENTIRE SELECTED ITEM UI
+   UPDATE SELECTED ITEM
 ========================================================= */
 
 function updateSelectedItem(
@@ -878,26 +1003,19 @@ function updateSelectedItem(
 
 
 /* =========================================================
-   SCROLL HELPERS
+   SCROLLING
 ========================================================= */
 
 function scrollToLowerHome() {
 
     const lower =
-        getElement(
-            "lowerHome"
-        );
+        getElement("lowerHome");
 
 
     lower?.scrollIntoView(
         {
-
-            behavior:
-                "smooth",
-
-            block:
-                "start"
-
+            behavior: "smooth",
+            block: "start"
         }
     );
 
@@ -907,20 +1025,32 @@ function scrollToLowerHome() {
 function scrollToHomeHero() {
 
     const hero =
-        getElement(
-            "homeHero"
-        );
+        getElement("homeHero");
 
 
     hero?.scrollIntoView(
         {
+            behavior: "smooth",
+            block: "start"
+        }
+    );
 
-            behavior:
-                "smooth",
+}
 
-            block:
-                "start"
 
+function scrollToZero() {
+
+    const zero =
+        getElement("apxZeroSection");
+
+
+    (
+        zero ||
+        getElement("lowerHome")
+    )?.scrollIntoView(
+        {
+            behavior: "smooth",
+            block: "start"
         }
     );
 
@@ -931,9 +1061,7 @@ function scrollToHomeHero() {
    SCREEN SWITCHING
 ========================================================= */
 
-function showScreen(
-    page
-) {
+function showScreen(page) {
 
     document
         .querySelectorAll(
@@ -945,6 +1073,10 @@ function showScreen(
                 const active =
                     screen.dataset.apxScreen ===
                     page;
+
+
+                screen.hidden =
+                    !active;
 
 
                 screen.classList.toggle(
@@ -964,29 +1096,70 @@ function showScreen(
         );
 
 
-    if (
-        page === "home"
-    ) {
+    document
+        .querySelectorAll(
+            "[data-apx-page]"
+        )
+        .forEach(
+            button => {
+
+                const active =
+                    button.dataset.apxPage ===
+                    page;
+
+
+                button.classList.toggle(
+                    "active",
+                    active
+                );
+
+
+                if (active) {
+
+                    button.setAttribute(
+                        "aria-current",
+                        "page"
+                    );
+
+                }
+
+                else {
+
+                    button.removeAttribute(
+                        "aria-current"
+                    );
+
+                }
+
+            }
+        );
+
+
+    if (page === "home") {
 
         window.setTimeout(
             () => {
 
                 if (
-                    typeof carouselModule?.refreshCarousel ===
+                    typeof carouselModule
+                        ?.refreshCarousel ===
                     "function"
                 ) {
 
-                    carouselModule.refreshCarousel();
+                    carouselModule
+                        .refreshCarousel();
 
                 }
 
 
                 if (
-                    typeof focusModule?.refreshFocus ===
+                    typeof focusModule
+                        ?.refreshFocus ===
                     "function"
                 ) {
 
-                    focusModule.refreshFocus();
+                    focusModule
+                        .refreshFocus();
 
                 }
 
@@ -996,6 +1169,18 @@ function showScreen(
 
     }
 
+
+    window.dispatchEvent(
+        new CustomEvent(
+            "apx:screenvisible",
+            {
+                detail: {
+                    page
+                }
+            }
+        )
+    );
+
 }
 
 
@@ -1003,9 +1188,7 @@ function showScreen(
    CAROUSEL EVENT
 ========================================================= */
 
-function handleGameChange(
-    event
-) {
+function handleGameChange(event) {
 
     const detail =
         event.detail ||
@@ -1033,15 +1216,13 @@ function handleGameChange(
    PAGE EVENT
 ========================================================= */
 
-function handlePageChange(
-    event
-) {
+function handlePageChange(event) {
 
     const detail =
         event.detail;
 
 
-    const page =
+    let page =
         typeof detail === "string"
             ? detail
             : detail?.page;
@@ -1052,6 +1233,18 @@ function handlePageChange(
     }
 
 
+    /*
+       Compatibility with the temporary v0.41 navigation.js
+       naming.
+
+       Final APX naming is "apx-ai".
+    */
+
+    if (page === "ai") {
+        page = "apx-ai";
+    }
+
+
     showScreen(
         page
     );
@@ -1059,13 +1252,110 @@ function handlePageChange(
 
     window.scrollTo(
         {
-
             top: 0,
-
-            behavior:
-                "smooth"
-
+            behavior: "smooth"
         }
+    );
+
+}
+
+
+/* =========================================================
+   STORE -> HOME GAME OPEN
+========================================================= */
+
+function handleStoreGame(event) {
+
+    const detail =
+        event.detail ||
+        {};
+
+
+    const gameId =
+        typeof detail === "string"
+            ? detail
+            : (
+                detail.gameId ||
+                detail.id ||
+                detail.game?.id
+            );
+
+
+    if (!gameId) {
+        return;
+    }
+
+
+    /*
+       Ask carousel.js to select the requested game.
+    */
+
+    if (
+        typeof carouselModule
+            ?.selectGameById ===
+        "function"
+    ) {
+
+        carouselModule.selectGameById(
+            gameId
+        );
+
+    }
+
+
+    /*
+       Navigation may already do this.
+
+       Doing it here as well makes Store -> Home resilient.
+    */
+
+    if (
+        typeof navigationModule
+            ?.navigateToPage ===
+        "function"
+    ) {
+
+        navigationModule.navigateToPage(
+            "home"
+        );
+
+    }
+
+    else {
+
+        showScreen(
+            "home"
+        );
+
+    }
+
+
+    window.setTimeout(
+        () => {
+
+            scrollToHomeHero();
+
+
+            const game =
+                typeof gamesModule
+                    ?.getGameById ===
+                "function"
+                    ? gamesModule.getGameById(
+                        gameId
+                    )
+                    : null;
+
+
+            if (game) {
+
+                updateSelectedItem(
+                    game
+                );
+
+            }
+
+        },
+        80
     );
 
 }
@@ -1074,52 +1364,44 @@ function handlePageChange(
 /* =========================================================
    SESSION PROTOTYPE
 
-   APX v0.4 still does NOT claim real streaming exists.
+   THIS IS NOT REAL CLOUD STREAMING.
 ========================================================= */
 
-async function showSessionPrototype(
-    game
-) {
+async function showSessionPrototype(game) {
 
     if (!game) {
         return;
     }
 
 
-    const overlay =
-        getElement(
-            "sessionOverlay"
-        );
+    if (
+        isWelcome(game) ||
+        isZero(game) ||
+        isPlaceholder(game)
+    ) {
+        return;
+    }
 
+
+    const overlay =
+        getElement("sessionOverlay");
 
     const title =
-        getElement(
-            "sessionTitle"
-        );
-
+        getElement("sessionTitle");
 
     const spinner =
-        getElement(
-            "sessionSpinner"
-        );
-
+        getElement("sessionSpinner");
 
     const status =
-        getElement(
-            "sessionStatus"
-        );
-
+        getElement("sessionStatus");
 
     const description =
         getElement(
             "sessionDescription"
         );
 
-
     const close =
-        getElement(
-            "sessionClose"
-        );
+        getElement("sessionClose");
 
 
     if (!overlay) {
@@ -1172,7 +1454,8 @@ async function showSessionPrototype(
 
 
     if (
-        typeof focusModule?.hideFocus ===
+        typeof focusModule
+            ?.hideFocus ===
         "function"
     ) {
 
@@ -1190,6 +1473,7 @@ async function showSessionPrototype(
 
         [
             "Checking APX compatibility",
+
             game.apxCompatible
                 ? "This title is marked APX compatible."
                 : "This title is not connected to APX cloud streaming yet."
@@ -1211,9 +1495,7 @@ async function showSessionPrototype(
         of steps
     ) {
 
-        if (
-            overlay.hidden
-        ) {
+        if (overlay.hidden) {
             return;
         }
 
@@ -1241,9 +1523,7 @@ async function showSessionPrototype(
     }
 
 
-    if (
-        overlay.hidden
-    ) {
+    if (overlay.hidden) {
         return;
     }
 
@@ -1267,7 +1547,7 @@ async function showSessionPrototype(
     if (description) {
 
         description.textContent =
-            "APX v0.4 is currently the system interface prototype. Real remote game streaming infrastructure will be connected later.";
+            "APX v0.41 is currently the system interface prototype. Real remote game streaming infrastructure will be connected later.";
 
     }
 
@@ -1283,7 +1563,7 @@ async function showSessionPrototype(
 
 
 /* =========================================================
-   ACTION EVENTS
+   PRIMARY ACTION
 ========================================================= */
 
 function handlePrimaryAction() {
@@ -1297,12 +1577,11 @@ function handlePrimaryAction() {
     }
 
 
-    const isWelcome =
-        game.id === "welcome" ||
-        game.type === "welcome";
+    /*
+       WELCOME
+    */
 
-
-    if (isWelcome) {
+    if (isWelcome(game)) {
 
         scrollToLowerHome();
 
@@ -1311,11 +1590,9 @@ function handlePrimaryAction() {
             new CustomEvent(
                 "apx:openwelcome",
                 {
-
                     detail: {
                         game
                     }
-
                 }
             )
         );
@@ -1327,8 +1604,42 @@ function handlePrimaryAction() {
 
 
     /*
-       This launches the APX SESSION PROTOTYPE,
-       not a real remote streaming session.
+       APX ZERO
+    */
+
+    if (isZero(game)) {
+
+        scrollToZero();
+
+
+        window.dispatchEvent(
+            new CustomEvent(
+                "apx:openzero",
+                {
+                    detail: {
+                        game
+                    }
+                }
+            )
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+       Placeholder titles cannot launch.
+    */
+
+    if (isPlaceholder(game)) {
+        return;
+    }
+
+
+    /*
+       Prototype session only.
     */
 
     showSessionPrototype(
@@ -1340,17 +1651,19 @@ function handlePrimaryAction() {
         new CustomEvent(
             "apx:sessionrequest",
             {
-
                 detail: {
                     game
                 }
-
             }
         )
     );
 
 }
 
+
+/* =========================================================
+   SECONDARY ACTION
+========================================================= */
 
 function handleSecondaryAction() {
 
@@ -1363,9 +1676,73 @@ function handleSecondaryAction() {
     }
 
 
-    const isWelcome =
-        game.id === "welcome" ||
-        game.type === "welcome";
+    if (isWelcome(game)) {
+
+        scrollToLowerHome();
+
+
+        window.dispatchEvent(
+            new CustomEvent(
+                "apx:systeminfo",
+                {
+                    detail: {
+                        game
+                    }
+                }
+            )
+        );
+
+
+        return;
+
+    }
+
+
+    if (isZero(game)) {
+
+        scrollToZero();
+
+
+        window.dispatchEvent(
+            new CustomEvent(
+                "apx:openzero",
+                {
+                    detail: {
+                        game,
+                        view: "benefits"
+                    }
+                }
+            )
+        );
+
+
+        window.setTimeout(
+            () => {
+
+                const benefits =
+                    getElement(
+                        "zeroBenefits"
+                    );
+
+
+                benefits?.scrollIntoView(
+                    {
+                        behavior:
+                            "smooth",
+
+                        block:
+                            "center"
+                    }
+                );
+
+            },
+            450
+        );
+
+
+        return;
+
+    }
 
 
     scrollToLowerHome();
@@ -1373,15 +1750,11 @@ function handleSecondaryAction() {
 
     window.dispatchEvent(
         new CustomEvent(
-            isWelcome
-                ? "apx:systeminfo"
-                : "apx:gameinfo",
+            "apx:gameinfo",
             {
-
                 detail: {
                     game
                 }
-
             }
         )
     );
@@ -1390,31 +1763,59 @@ function handleSecondaryAction() {
 
 
 /* =========================================================
-   QUICK AI
+   APX ZERO RETURN
+========================================================= */
 
-   This is still only the v0.4 UI hook.
+function handleReturnFromZero() {
 
-   Gemini is NOT connected here.
+    scrollToHomeHero();
+
+
+    window.setTimeout(
+        () => {
+
+            const selected =
+                document.querySelector(
+                    ".game-card.selected"
+                );
+
+
+            if (
+                selected &&
+                typeof focusModule
+                    ?.setFocusTarget ===
+                "function"
+            ) {
+
+                focusModule.setFocusTarget(
+                    selected
+                );
+
+            }
+
+        },
+        450
+    );
+
+}
+
+
+/* =========================================================
+   QUICK APX AI
+
+   Gemini is intentionally NOT connected yet.
 ========================================================= */
 
 function handleQuickAIRequest() {
 
     const quickAI =
-        getElement(
-            "quickAI"
-        );
-
+        getElement("quickAI");
 
     const quickInput =
-        getElement(
-            "quickAIInput"
-        );
-
+        getElement("quickAIInput");
 
     const quickText =
-        getElement(
-            "quickAIText"
-        );
+        getElement("quickAIText");
 
 
     if (!quickAI) {
@@ -1457,9 +1858,7 @@ function handleQuickAIRequest() {
 function closeQuickAI() {
 
     const quickAI =
-        getElement(
-            "quickAI"
-        );
+        getElement("quickAI");
 
 
     if (quickAI) {
@@ -1488,9 +1887,7 @@ function closeQuickAI() {
 function handleBack() {
 
     const quickAI =
-        getElement(
-            "quickAI"
-        );
+        getElement("quickAI");
 
 
     if (
@@ -1510,9 +1907,7 @@ function handleBack() {
 
 
     const state =
-        stateModule?.getAPXState
-            ? stateModule.getAPXState()
-            : stateModule?.APXState;
+        getState();
 
 
     if (
@@ -1521,7 +1916,8 @@ function handleBack() {
     ) {
 
         if (
-            typeof navigationModule?.navigateToPage ===
+            typeof navigationModule
+                ?.navigateToPage ===
             "function"
         ) {
 
@@ -1530,7 +1926,6 @@ function handleBack() {
             );
 
         }
-
 
         else {
 
@@ -1559,27 +1954,21 @@ function handleBack() {
 
 
 /* =========================================================
-   AI FORM PLACEHOLDER
+   FULL APX AI PLACEHOLDER
+
+   Gemini integration comes after v0.41 passes testing.
 ========================================================= */
 
 function bindAIPrototype() {
 
     const form =
-        getElement(
-            "aiForm"
-        );
-
+        getElement("aiForm");
 
     const input =
-        getElement(
-            "aiInput"
-        );
-
+        getElement("aiInput");
 
     const conversation =
-        getElement(
-            "aiConversation"
-        );
+        getElement("aiConversation");
 
 
     if (
@@ -1702,7 +2091,7 @@ function bindAIPrototype() {
 
 
                     responseBubble.textContent =
-                        "The APX AI interface is ready, but the real AI backend hasn't been connected yet.";
+                        "APX AI is ready for its backend connection. Gemini has not been connected yet.";
 
 
                     response.append(
@@ -1730,33 +2119,22 @@ function bindAIPrototype() {
 
 
 /* =========================================================
-   QUICK AI FORM PLACEHOLDER
+   QUICK AI PLACEHOLDER
 ========================================================= */
 
 function bindQuickAIPrototype() {
 
     const form =
-        getElement(
-            "quickAIForm"
-        );
-
+        getElement("quickAIForm");
 
     const input =
-        getElement(
-            "quickAIInput"
-        );
-
+        getElement("quickAIInput");
 
     const text =
-        getElement(
-            "quickAIText"
-        );
-
+        getElement("quickAIText");
 
     const quickAI =
-        getElement(
-            "quickAI"
-        );
+        getElement("quickAI");
 
 
     if (
@@ -1795,7 +2173,7 @@ function bindQuickAIPrototype() {
             if (text) {
 
                 text.textContent =
-                    "Real APX AI connects after the v0.4 interface is locked.";
+                    "Gemini connects after APX v0.41 passes testing.";
 
             }
 
@@ -1818,15 +2196,10 @@ function bindQuickAIPrototype() {
 function bindSessionClose() {
 
     const overlay =
-        getElement(
-            "sessionOverlay"
-        );
-
+        getElement("sessionOverlay");
 
     const close =
-        getElement(
-            "sessionClose"
-        );
+        getElement("sessionClose");
 
 
     if (
@@ -1856,7 +2229,8 @@ function bindSessionClose() {
 
                     if (
                         selected &&
-                        typeof focusModule?.setFocusTarget ===
+                        typeof focusModule
+                            ?.setFocusTarget ===
                         "function"
                     ) {
 
@@ -1883,33 +2257,22 @@ function bindSessionClose() {
 function bindDOMEvents() {
 
     const primary =
-        getElement(
-            "primaryAction"
-        );
-
+        getElement("primaryAction");
 
     const secondary =
-        getElement(
-            "secondaryAction"
-        );
-
+        getElement("secondaryAction");
 
     const scroll =
-        getElement(
-            "scrollToHub"
-        );
-
+        getElement("scrollToHub");
 
     const returnToCarousel =
-        getElement(
-            "returnToCarousel"
-        );
+        getElement("returnToCarousel");
 
+    const returnFromZero =
+        getElement("returnFromZero");
 
     const continueButton =
-        getElement(
-            "continueButton"
-        );
+        getElement("continueButton");
 
 
     primary?.addEventListener(
@@ -1936,6 +2299,12 @@ function bindDOMEvents() {
     );
 
 
+    returnFromZero?.addEventListener(
+        "click",
+        handleReturnFromZero
+    );
+
+
     continueButton?.addEventListener(
         "click",
         () => {
@@ -1957,6 +2326,12 @@ function bindDOMEvents() {
     window.addEventListener(
         "apx:pagechange",
         handlePageChange
+    );
+
+
+    window.addEventListener(
+        "apx:storegame",
+        handleStoreGame
     );
 
 
@@ -2016,10 +2391,7 @@ function initializeUI() {
 /* =========================================================
    MODULE LOADER
 
-   Dynamic imports are intentional.
-
-   If one fails, the error gets caught and APX can still
-   escape the loading screen.
+   Every core module is dynamically imported.
 ========================================================= */
 
 async function loadAPXModules() {
@@ -2046,6 +2418,14 @@ async function loadAPXModules() {
 
                 import(
                     "./navigation.js"
+                ),
+
+                import(
+                    "./store.js"
+                ),
+
+                import(
+                    "./apx-zero.js"
                 )
 
             ]
@@ -2057,7 +2437,9 @@ async function loadAPXModules() {
         gamesModule,
         focusModule,
         carouselModule,
-        navigationModule
+        navigationModule,
+        storeModule,
+        zeroModule
     ] = modules;
 
 }
@@ -2069,8 +2451,13 @@ async function loadAPXModules() {
 
 function initializeModules() {
 
+    /*
+       FOCUS
+    */
+
     if (
-        typeof focusModule?.initFocusSystem ===
+        typeof focusModule
+            ?.initFocusSystem ===
         "function"
     ) {
 
@@ -2087,8 +2474,13 @@ function initializeModules() {
     }
 
 
+    /*
+       CAROUSEL
+    */
+
     if (
-        typeof carouselModule?.initCarousel ===
+        typeof carouselModule
+            ?.initCarousel ===
         "function"
     ) {
 
@@ -2105,8 +2497,13 @@ function initializeModules() {
     }
 
 
+    /*
+       NAVIGATION
+    */
+
     if (
-        typeof navigationModule?.initNavigation ===
+        typeof navigationModule
+            ?.initNavigation ===
         "function"
     ) {
 
@@ -2118,6 +2515,52 @@ function initializeModules() {
 
         throw new Error(
             "navigation.js loaded, but initNavigation() was not found."
+        );
+
+    }
+
+
+    /*
+       STORE
+    */
+
+    if (
+        typeof storeModule
+            ?.initAPXStore ===
+        "function"
+    ) {
+
+        storeModule.initAPXStore();
+
+    }
+
+    else {
+
+        console.warn(
+            "[APX] store.js loaded without initAPXStore()."
+        );
+
+    }
+
+
+    /*
+       APX ZERO
+    */
+
+    if (
+        typeof zeroModule
+            ?.initAPXZero ===
+        "function"
+    ) {
+
+        zeroModule.initAPXZero();
+
+    }
+
+    else {
+
+        console.warn(
+            "[APX] apx-zero.js loaded without initAPXZero()."
         );
 
     }
@@ -2149,7 +2592,8 @@ function focusInitialCard() {
 
 
                     if (
-                        typeof focusModule?.setFocusTarget ===
+                        typeof focusModule
+                            ?.setFocusTarget ===
                         "function"
                     ) {
 
@@ -2183,41 +2627,45 @@ async function bootAPX() {
         true;
 
 
+    /*
+       Install this BEFORE loading modules.
+    */
+
     installEmergencyBootRelease();
 
 
     try {
 
         /*
-           1. Load module files.
+           1. Load v0.41 modules.
         */
 
         await loadAPXModules();
 
 
         /*
-           2. Initialize systems.
+           2. Initialize modules.
         */
 
         initializeModules();
 
 
         /*
-           3. Bind APX application events.
+           3. Bind application events.
         */
 
         bindDOMEvents();
 
 
         /*
-           4. Build initial Home UI.
+           4. Build initial UI.
         */
 
         initializeUI();
 
 
         /*
-           5. Wait for the first browser render.
+           5. Allow first browser render.
         */
 
         await new Promise(
@@ -2238,15 +2686,14 @@ async function bootAPX() {
 
 
         /*
-           6. Attach focus to Welcome.
+           6. Attach universal focus to Welcome.
         */
 
         focusInitialCard();
 
 
         /*
-           7. Small deliberate boot presentation.
-           It should feel like APX started, not flash away.
+           7. Small deliberate APX startup presentation.
         */
 
         await wait(
@@ -2255,14 +2702,14 @@ async function bootAPX() {
 
 
         /*
-           8. APX IS READY.
+           8. APX READY.
         */
 
         finishBootScreen();
 
 
         console.log(
-            "[APX] v0.4 boot complete."
+            "[APX] v0.41 boot complete."
         );
 
     }
@@ -2270,9 +2717,7 @@ async function bootAPX() {
     catch (error) {
 
         /*
-           The important part:
-
-           Even if a module breaks, RELEASE THE BOOT SCREEN.
+           NEVER leave APX trapped behind the boot screen.
         */
 
         console.error(
