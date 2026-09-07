@@ -34,7 +34,7 @@
 
     <link
         rel="stylesheet"
-        href="style.css?v=0.4"
+        href="style.css?v=0.41"
     >
 </head>
 
@@ -42,7 +42,7 @@
 <body>
 
     <!-- =====================================================
-         APX UNIVERSAL FOCUS FRAME
+         UNIVERSAL FOCUS FRAME
     ====================================================== -->
 
     <div
@@ -79,12 +79,6 @@
 
     <!-- =====================================================
          LOGGED OUT EXPERIENCE
-
-         account.js will eventually decide whether this or
-         the main APX system is shown.
-
-         For v0.4 UI testing, the main system remains visible
-         by default.
     ====================================================== -->
 
     <section
@@ -286,10 +280,6 @@
 
         <header class="system-bar">
 
-
-            <!-- Empty left side intentionally creates the
-                 console-style centered navigation. -->
-
             <div
                 class="system-bar-left"
                 aria-hidden="true"
@@ -310,6 +300,16 @@
                     type="button"
                 >
                     Home
+                </button>
+
+
+                <button
+                    class="nav-item"
+                    data-apx-page="store"
+                    data-apx-focus
+                    type="button"
+                >
+                    Store
                 </button>
 
 
@@ -349,10 +349,9 @@
             </nav>
 
 
-            <!-- ACCOUNT + TIME -->
+            <!-- STATUS + CLOCK + ACCOUNT -->
 
             <div class="system-actions">
-
 
                 <div
                     class="cloud-indicator"
@@ -365,6 +364,30 @@
                     </strong>
                 </div>
 
+
+                <!-- CLOCK MOVED INWARD -->
+
+                <div
+                    class="clock"
+                    aria-label="Current time"
+                >
+
+                    <strong
+                        id="systemTime"
+                    >
+                        --:--
+                    </strong>
+
+                    <span
+                        id="systemDate"
+                    >
+                        ---
+                    </span>
+
+                </div>
+
+
+                <!-- PROFILE NOW FAR-RIGHT -->
 
                 <button
                     class="profile-button"
@@ -397,26 +420,6 @@
 
                 </button>
 
-
-                <div
-                    class="clock"
-                    aria-label="Current time"
-                >
-
-                    <strong
-                        id="systemTime"
-                    >
-                        --:--
-                    </strong>
-
-                    <span
-                        id="systemDate"
-                    >
-                        ---
-                    </span>
-
-                </div>
-
             </div>
 
         </header>
@@ -433,9 +436,7 @@
         >
 
 
-            <!-- =============================================
-                 FIRST VIEWPORT
-            ============================================== -->
+            <!-- FIRST VIEWPORT -->
 
             <section
                 class="home-hero"
@@ -450,9 +451,8 @@
                     id="selectedGameCopy"
                 >
 
-                    <div
-                        class="selected-status"
-                    >
+                    <div class="selected-status">
+
                         <span></span>
 
                         <strong
@@ -460,6 +460,7 @@
                         >
                             System
                         </strong>
+
                     </div>
 
 
@@ -489,9 +490,7 @@
                 </div>
 
 
-                <!-- =========================================
-                     CAROUSEL
-                ========================================== -->
+                <!-- CAROUSEL -->
 
                 <div class="carousel-stage">
 
@@ -504,13 +503,7 @@
                 </div>
 
 
-                <!-- =========================================
-                     ACTIONS
-
-                     Extra spacing below the selected card is
-                     intentional so the detached focus frame
-                     cannot collide with these buttons.
-                ========================================== -->
+                <!-- ACTIONS -->
 
                 <div class="hero-actions">
 
@@ -558,12 +551,6 @@
 
             <!-- =================================================
                  LOWER HOME
-
-                 Welcome dashboard and Game Hub occupy the same
-                 lower region. welcome.js will eventually control
-                 this directly.
-
-                 CSS/body state handles the initial switch.
             ================================================== -->
 
             <section
@@ -574,8 +561,6 @@
 
                 <!-- =============================================
                      WELCOME DASHBOARD
-
-                     ONLY shown when Welcome is selected.
                 ============================================== -->
 
                 <div
@@ -608,6 +593,7 @@
                             <span class="status-dot"></span>
 
                             <div>
+
                                 <small>
                                     APX STATUS
                                 </small>
@@ -615,14 +601,13 @@
                                 <strong>
                                     Ready
                                 </strong>
+
                             </div>
 
                         </div>
 
                     </div>
 
-
-                    <!-- FEATURE ROW -->
 
                     <div class="welcome-feature-grid">
 
@@ -723,6 +708,7 @@
                                     </div>
 
                                     <div>
+
                                         <strong>
                                             Apex Friend
                                         </strong>
@@ -730,6 +716,7 @@
                                         <span>
                                             Online
                                         </span>
+
                                     </div>
 
                                     <i></i>
@@ -744,6 +731,7 @@
                                     </div>
 
                                     <div>
+
                                         <strong>
                                             More friends
                                         </strong>
@@ -751,6 +739,7 @@
                                         <span>
                                             Connect through Apex Games
                                         </span>
+
                                     </div>
 
                                 </div>
@@ -892,7 +881,7 @@
                                 </span>
 
                                 <span class="panel-meta">
-                                    v0.4
+                                    v0.41
                                 </span>
 
                             </div>
@@ -906,6 +895,7 @@
                             <div class="system-stat-list">
 
                                 <div>
+
                                     <span>
                                         Network
                                     </span>
@@ -913,10 +903,12 @@
                                     <strong>
                                         Connected
                                     </strong>
+
                                 </div>
 
 
                                 <div>
+
                                     <span>
                                         Apex Account
                                     </span>
@@ -924,10 +916,12 @@
                                     <strong>
                                         Prototype
                                     </strong>
+
                                 </div>
 
 
                                 <div>
+
                                     <span>
                                         Cloud Sessions
                                     </span>
@@ -935,10 +929,12 @@
                                     <strong>
                                         Not connected
                                     </strong>
+
                                 </div>
 
 
                                 <div>
+
                                     <span>
                                         APX AI
                                     </span>
@@ -946,6 +942,7 @@
                                     <strong>
                                         Local prototype
                                     </strong>
+
                                 </div>
 
                             </div>
@@ -958,9 +955,121 @@
 
 
                 <!-- =============================================
-                     GAME HUB
+                     APX ZERO
+                ============================================== -->
 
-                     Shown for actual game selections.
+                <div
+                    class="apx-zero-section"
+                    id="apxZeroSection"
+                    hidden
+                >
+
+                    <div class="zero-hero">
+
+                        <div class="zero-hero-copy">
+
+                            <span class="zero-eyebrow">
+                                APX MEMBERSHIP
+                            </span>
+
+                            <h2>
+                                APX ZERO
+                            </h2>
+
+                            <p>
+                                A premium APX membership built
+                                around the cloud gaming experience.
+                            </p>
+
+
+                            <div class="zero-status-row">
+
+                                <span
+                                    class="zero-membership-status"
+                                    id="zeroMembershipStatus"
+                                >
+                                    ZERO PREVIEW
+                                </span>
+
+
+                                <button
+                                    class="zero-membership-action"
+                                    id="zeroMembershipAction"
+                                    data-apx-focus
+                                    type="button"
+                                >
+                                    Explore Membership
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="zero-symbol"
+                            aria-hidden="true"
+                        >
+                            0
+                        </div>
+
+                    </div>
+
+
+                    <div class="zero-section-heading">
+
+                        <span>
+                            APX ZERO
+                        </span>
+
+                        <h3>
+                            Built for what comes next.
+                        </h3>
+
+                        <p>
+                            ZERO is still in development.
+                            Membership features will be announced
+                            as the APX platform grows.
+                        </p>
+
+                    </div>
+
+
+                    <div
+                        class="zero-benefits"
+                        id="zeroBenefits"
+                    ></div>
+
+
+                    <div class="zero-preview-note">
+
+                        <span>
+                            ZERO PREVIEW
+                        </span>
+
+                        <p>
+                            APX ZERO subscriptions, payments,
+                            entitlements and final benefits are
+                            not connected yet.
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        class="return-button"
+                        id="returnFromZero"
+                        data-apx-focus
+                        type="button"
+                    >
+                        ↑ Return to Home
+                    </button>
+
+                </div>
+
+
+                <!-- =============================================
+                     GAME HUB
                 ============================================== -->
 
                 <div
@@ -1298,6 +1407,124 @@
 
 
         <!-- =================================================
+             STORE
+        ================================================== -->
+
+        <main
+            class="system-page store-page"
+            data-apx-screen="store"
+            aria-hidden="true"
+            hidden
+        >
+
+            <div class="page-content store-page-content">
+
+
+                <div class="store-header">
+
+                    <div class="page-heading">
+
+                        <span>
+                            APX STORE
+                        </span>
+
+                        <h1>
+                            Find your next game.
+                        </h1>
+
+                        <p>
+                            Explore games across the APX ecosystem.
+                            Cloud availability is shown separately
+                            from normal game availability.
+                        </p>
+
+                    </div>
+
+
+                    <div class="apx-store-search-shell">
+
+                        <span aria-hidden="true">
+                            ⌕
+                        </span>
+
+                        <input
+                            id="apxStoreSearch"
+                            type="search"
+                            autocomplete="off"
+                            placeholder="Search games..."
+                            aria-label="Search APX Store"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="store-feature-banner">
+
+                    <div>
+
+                        <span>
+                            APX COLLECTION
+                        </span>
+
+                        <h2>
+                            Games built for the
+                            Apex ecosystem.
+                        </h2>
+
+                        <p>
+                            Browse titles here, then jump directly
+                            into their APX Home experience.
+                        </p>
+
+                    </div>
+
+
+                    <div
+                        class="store-feature-mark"
+                        aria-hidden="true"
+                    >
+                        APX
+                    </div>
+
+                </div>
+
+
+                <div class="store-section-header">
+
+                    <div>
+
+                        <span>
+                            GAMES
+                        </span>
+
+                        <h2>
+                            Browse
+                        </h2>
+
+                    </div>
+
+
+                    <span class="store-cloud-note">
+                        Cloud support varies by title
+                    </span>
+
+                </div>
+
+
+                <section
+                    class="apx-store-grid"
+                    id="apxStoreGrid"
+                    aria-label="APX Store games"
+                ></section>
+
+            </div>
+
+        </main>
+
+
+        <!-- =================================================
              FRIENDS
         ================================================== -->
 
@@ -1305,6 +1532,7 @@
             class="system-page"
             data-apx-screen="friends"
             aria-hidden="true"
+            hidden
         >
 
             <div class="page-content">
@@ -1432,6 +1660,7 @@
             class="system-page ai-page"
             data-apx-screen="apx-ai"
             aria-hidden="true"
+            hidden
         >
 
             <div class="ai-page-content">
@@ -1552,6 +1781,7 @@
             class="system-page"
             data-apx-screen="chat"
             aria-hidden="true"
+            hidden
         >
 
             <div class="page-content">
@@ -1747,7 +1977,7 @@
 
 
         <!-- =================================================
-             APX CLOUD SESSION PROTOTYPE
+             CLOUD SESSION PROTOTYPE
         ================================================== -->
 
         <section
@@ -1807,26 +2037,22 @@
         </section>
 
 
-        <!-- =================================================
-             VERSION
-        ================================================== -->
+        <!-- VERSION -->
 
         <div class="apx-version">
-            APX v0.4
+            APX v0.41
         </div>
 
     </div>
 
 
     <!-- =====================================================
-         APX v0.4 MODULE ENTRY
-
-         Old script.js is intentionally NOT loaded.
+         APX v0.41 MODULE ENTRY
     ====================================================== -->
 
     <script
         type="module"
-        src="js/app.js?v=0.4"
+        src="js/app.js?v=0.41"
     ></script>
 
 </body>
