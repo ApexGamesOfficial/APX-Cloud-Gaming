@@ -3,18 +3,19 @@
    NAVIGATION SYSTEM
 
    Pages:
-   - Home
-   - Store
-   - Friends
-   - APX AI
-   - Chat
+   Home
+   Store
+   Friends
+   APX AI
+   Chat
 
-   Also controls:
-   - Home carousel keyboard navigation
-   - Pointer / keyboard input mode
+   Handles:
+   - Mouse / touch
+   - Keyboard
+   - Home carousel navigation
    - Quick APX AI shortcut
-   - Back / Escape
-   - Store -> Home game navigation
+   - Store -> Home game selection
+   - Universal APX focus handoff
 ========================================================= */
 
 import {
@@ -39,645 +40,196 @@ import {
 
 
 /* =========================================================
+   CONSTANTS
+========================================================= */
+
+const VALID_PAGES = [
+    "home",
+    "store",
+    "friends",
+    "apx-ai",
+    "chat"
+];
+
+
+let initialized = false;
+
+
+/* =========================================================
    HELPERS
 ========================================================= */
 
-function isTyping() {
+function isTypingTarget(target) {
 
-    const element =
-        document.activeElement;
-
-
-    if (!element) {
+    if (!target) {
         return false;
     }
 
 
     const tag =
-        element.tagName?.toLowerCase();
+        target.tagName?.toLowerCase();
 
 
     return (
         tag === "input" ||
         tag === "textarea" ||
         tag === "select" ||
-        element.isContentEditable
+        target.isContentEditable === true
     );
 
 }
 
 
-function isHomeCarouselArea() {
+function getPageButtons() {
 
-    return (
-        APXState.activePage === "home" &&
-        window.scrollY <
-            window.innerHeight * 0.55
-    );
-
-}
-
-
-/* =========================================================
-   PAGE ELEMENTS
-========================================================= */
-
-function getPageElements() {
-
-    return document.querySelectorAll(
-        "[data-apx-screen]"
-    );
-
-}
-
-
-function getNavigationItems() {
-
-    return document.querySelectorAll(
-        "[data-apx-page]"
-    );
-
-}
-
-
-/* =========================================================
-   NAVIGATION UI
-========================================================= */
-
-export function updateNavigationUI() {
-
-    getNavigationItems()
-        .forEach(
-            item => {
-
-                const active =
-                    item.dataset.apxPage ===
-                    APXState.activePage;
-
-
-                item.classList.toggle(
-                    "active",
-                    active
-                );
-
-
-                if (active) {
-
-                    item.setAttribute(
-                        "aria-current",
-                        "page"
-                    );
-
-                }
-                else {
-
-                    item.removeAttribute(
-                        "aria-current"
-                    );
-
-                }
-
-            }
-        );
-
-
-    document.body.dataset.apxPage =
-        APXState.activePage;
-
-}
-
-
-/* =========================================================
-   SCREEN VISIBILITY
-========================================================= */
-
-function updateScreenVisibility() {
-
-    getPageElements()
-        .forEach(
-            screen => {
-
-                const screenName =
-                    screen.dataset.apxScreen;
-
-
-                const active =
-                    screenName ===
-                    APXState.activePage;
-
-
-                screen.hidden =
-                    !active;
-
-
-                screen.classList.toggle(
-                    "active",
-                    active
-                );
-
-            }
-        );
-
-}
-
-
-/* =========================================================
-   NAVIGATE
-========================================================= */
-
-export function navigateToPage(
-    page,
-    options = {}
-) {
-
-    const validPages =
-        [
-            "home",
-            "store",
-            "friends",
-            "ai",
-            "chat"
-        ];
-
-
-    if (
-        !validPages.includes(
-            page
-        )
-    ) {
-
-        console.warn(
-            `[APX] Unknown page: ${page}`
-        );
-
-        return;
-
-    }
-
-
-    setActivePage(
-        page
-    );
-
-
-    updateScreenVisibility();
-
-    updateNavigationUI();
-
-
-    /*
-       Home should return to the top unless another APX
-       system specifically requests otherwise.
-    */
-
-    if (
-        page === "home" &&
-        options.preserveScroll !== true
-    ) {
-
-        window.scrollTo(
-            {
-                top: 0,
-                behavior:
-                    options.instant
-                        ? "auto"
-                        : "smooth"
-            }
-        );
-
-    }
-
-
-    /*
-       Non-Home pages behave like full APX screens.
-    */
-
-    if (
-        page !== "home"
-    ) {
-
-        window.scrollTo(
-            {
-                top: 0,
-                behavior:
-                    options.instant
-                        ? "auto"
-                        : "smooth"
-            }
-        );
-
-    }
-
-
-    window.dispatchEvent(
-        new CustomEvent(
-            "apx:pagechange",
-            {
-                detail: {
-                    page
-                }
-            }
-        )
-    );
-
-
-    /*
-       Give the new screen one frame to render before
-       recalculating the detached focus frame.
-    */
-
-    requestAnimationFrame(
-        () => {
-
-            refreshFocus();
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   PAGE SHORTCUTS
-========================================================= */
-
-export function openHome() {
-
-    navigateToPage(
-        "home"
-    );
-
-}
-
-
-export function openStore() {
-
-    navigateToPage(
-        "store"
-    );
-
-}
-
-
-export function openFriends() {
-
-    navigateToPage(
-        "friends"
-    );
-
-}
-
-
-export function openAPXAI() {
-
-    navigateToPage(
-        "ai"
-    );
-
-}
-
-
-export function openChat() {
-
-    navigateToPage(
-        "chat"
-    );
-
-}
-
-
-/* =========================================================
-   ACTIVE NAV FOCUS
-========================================================= */
-
-function focusActiveNavigationItem() {
-
-    const active =
-        document.querySelector(
-            `[data-apx-page="${APXState.activePage}"]`
-        );
-
-
-    if (!active) {
-
-        return;
-
-    }
-
-
-    setFocusTarget(
-        active
-    );
-
-}
-
-
-/* =========================================================
-   HOME CAROUSEL KEYBOARD
-========================================================= */
-
-function handleHomeCarouselKey(
-    event
-) {
-
-    if (
-        !isHomeCarouselArea()
-    ) {
-
-        return false;
-
-    }
-
-
-    if (
-        event.key === "ArrowLeft"
-    ) {
-
-        event.preventDefault();
-
-
-        setInputMode(
-            "keyboard"
-        );
-
-
-        selectPreviousGame(
-            "keyboard"
-        );
-
-
-        return true;
-
-    }
-
-
-    if (
-        event.key === "ArrowRight"
-    ) {
-
-        event.preventDefault();
-
-
-        setInputMode(
-            "keyboard"
-        );
-
-
-        selectNextGame(
-            "keyboard"
-        );
-
-
-        return true;
-
-    }
-
-
-    if (
-        event.key === "Enter"
-    ) {
-
-        const selected =
-            getSelectedCard();
-
-
-        if (!selected) {
-
-            return false;
-
-        }
-
-
-        event.preventDefault();
-
-
-        selected.click();
-
-
-        return true;
-
-    }
-
-
-    return false;
-
-}
-
-
-/* =========================================================
-   GLOBAL KEYBOARD
-========================================================= */
-
-function handleKeyboard(
-    event
-) {
-
-    if (
-        isTyping()
-    ) {
-
-        return;
-
-    }
-
-
-    setInputMode(
-        "keyboard"
-    );
-
-
-    if (
-        handleHomeCarouselKey(
-            event
-        )
-    ) {
-
-        return;
-
-    }
-
-
-    /*
-       Universal Quick APX AI.
-
-       Full APX AI page doesn't trigger the Quick AI overlay.
-    */
-
-    if (
-        event.key.toLowerCase() === "a" &&
-        APXState.activePage !== "ai"
-    ) {
-
-        event.preventDefault();
-
-
-        window.dispatchEvent(
-            new CustomEvent(
-                "apx:quickai"
-            )
-        );
-
-
-        return;
-
-    }
-
-
-    /*
-       Escape / controller-back equivalent.
-    */
-
-    if (
-        event.key === "Escape"
-    ) {
-
-        window.dispatchEvent(
-            new CustomEvent(
-                "apx:back"
-            )
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   POINTER INPUT
-========================================================= */
-
-function handlePointerDown() {
-
-    setInputMode(
-        "pointer"
-    );
-
-}
-
-
-/* =========================================================
-   NAV ITEM CLICK
-========================================================= */
-
-function handleNavigationClick(
-    event
-) {
-
-    const target =
-        event.target.closest(
+    return Array.from(
+        document.querySelectorAll(
             "[data-apx-page]"
-        );
-
-
-    if (!target) {
-
-        return;
-
-    }
-
-
-    const page =
-        target.dataset.apxPage;
-
-
-    if (!page) {
-
-        return;
-
-    }
-
-
-    navigateToPage(
-        page
+        )
     );
 
 }
 
 
-/* =========================================================
-   STORE -> HOME GAME
+function getScreens() {
 
-   store.js dispatches this when the user opens a title.
+    return Array.from(
+        document.querySelectorAll(
+            "[data-apx-screen]"
+        )
+    );
 
-   We return Home and select the matching carousel card.
-========================================================= */
-
-function handleStoreGame(
-    event
-) {
-
-    const gameId =
-        event.detail?.gameId;
+}
 
 
-    if (!gameId) {
+function normalizePage(page) {
 
-        return;
+    /*
+       Temporary backwards compatibility.
 
+       APX v0.41 officially uses "apx-ai".
+    */
+
+    if (page === "ai") {
+        return "apx-ai";
     }
 
 
-    navigateToPage(
-        "home",
-        {
-            instant: true
-        }
-    );
+    return page;
+
+}
 
 
-    /*
-       Wait for Home to become visible before moving the
-       carousel and focus frame.
-    */
+/* =========================================================
+   PAGE UI
+========================================================= */
 
-    requestAnimationFrame(
-        () => {
+function updatePageUI(page) {
 
-            requestAnimationFrame(
-                () => {
+    const normalizedPage =
+        normalizePage(page);
 
-                    selectGameById(
-                        gameId,
-                        "store"
-                    );
 
-                }
+    getScreens().forEach(
+        screen => {
+
+            const active =
+                screen.dataset.apxScreen ===
+                normalizedPage;
+
+
+            screen.hidden =
+                !active;
+
+
+            screen.classList.toggle(
+                "active",
+                active
+            );
+
+
+            screen.setAttribute(
+                "aria-hidden",
+                active
+                    ? "false"
+                    : "true"
             );
 
         }
     );
 
+
+    getPageButtons().forEach(
+        button => {
+
+            const buttonPage =
+                normalizePage(
+                    button.dataset.apxPage
+                );
+
+
+            const active =
+                buttonPage ===
+                normalizedPage;
+
+
+            button.classList.toggle(
+                "active",
+                active
+            );
+
+
+            if (active) {
+
+                button.setAttribute(
+                    "aria-current",
+                    "page"
+                );
+
+            }
+
+            else {
+
+                button.removeAttribute(
+                    "aria-current"
+                );
+
+            }
+
+        }
+    );
+
 }
 
 
 /* =========================================================
-   PAGE CHANGE FOCUS
+   PAGE FOCUS
 ========================================================= */
 
-function handlePageFocus(
-    event
-) {
+function focusCurrentPage(page) {
 
-    const page =
-        event.detail?.page;
+    const normalizedPage =
+        normalizePage(page);
 
 
-    if (!page) {
-
-        return;
-
-    }
-
-
-    requestAnimationFrame(
+    window.setTimeout(
         () => {
 
+            /*
+               HOME:
+               return focus to selected carousel card.
+            */
+
             if (
-                page === "home"
+                normalizedPage ===
+                "home"
             ) {
 
                 const selected =
-                    getSelectedCard();
+                    getSelectedCard?.() ||
+                    document.querySelector(
+                        ".game-card.selected"
+                    );
 
 
                 if (selected) {
@@ -693,12 +245,680 @@ function handlePageFocus(
                 }
 
 
+                refreshFocus?.();
+
                 return;
 
             }
 
 
-            focusActiveNavigationItem();
+            /*
+               OTHER PAGES:
+               use first available focusable APX element.
+            */
+
+            const screen =
+                document.querySelector(
+                    `[data-apx-screen="${normalizedPage}"]`
+                );
+
+
+            if (!screen) {
+                return;
+            }
+
+
+            const target =
+                screen.querySelector(
+                    "[data-apx-focus]:not([disabled])"
+                );
+
+
+            if (target) {
+
+                setFocusTarget(
+                    target,
+                    {
+                        track: true,
+                        duration: 500
+                    }
+                );
+
+            }
+
+            else {
+
+                refreshFocus?.();
+
+            }
+
+        },
+        90
+    );
+
+}
+
+
+/* =========================================================
+   NAVIGATE
+========================================================= */
+
+export function navigateToPage(
+    page,
+    options = {}
+) {
+
+    const normalizedPage =
+        normalizePage(page);
+
+
+    if (
+        !VALID_PAGES.includes(
+            normalizedPage
+        )
+    ) {
+
+        console.warn(
+            `[APX] Unknown page: ${page}`
+        );
+
+        return false;
+
+    }
+
+
+    setActivePage(
+        normalizedPage
+    );
+
+
+    updatePageUI(
+        normalizedPage
+    );
+
+
+    window.dispatchEvent(
+        new CustomEvent(
+            "apx:pagechange",
+            {
+                detail: {
+                    page:
+                        normalizedPage,
+
+                    source:
+                        options.source ||
+                        "navigation"
+                }
+            }
+        )
+    );
+
+
+    if (
+        options.scroll !== false
+    ) {
+
+        window.scrollTo(
+            {
+                top: 0,
+                behavior:
+                    options.instant
+                        ? "auto"
+                        : "smooth"
+            }
+        );
+
+    }
+
+
+    focusCurrentPage(
+        normalizedPage
+    );
+
+
+    return true;
+
+}
+
+
+/* =========================================================
+   NAV BUTTON CLICK
+========================================================= */
+
+function handleNavClick(event) {
+
+    const button =
+        event.currentTarget;
+
+
+    const page =
+        normalizePage(
+            button.dataset.apxPage
+        );
+
+
+    if (!page) {
+        return;
+    }
+
+
+    setInputMode?.(
+        "pointer"
+    );
+
+
+    navigateToPage(
+        page,
+        {
+            source:
+                "nav-click"
+        }
+    );
+
+}
+
+
+/* =========================================================
+   HOME CAROUSEL CHECK
+========================================================= */
+
+function homeCarouselIsActive() {
+
+    if (
+        APXState.activePage !==
+        "home"
+    ) {
+        return false;
+    }
+
+
+    /*
+       Once the user scrolls substantially into the lower
+       dashboard/hub, arrows should not unexpectedly move
+       the top carousel.
+    */
+
+    return (
+        window.scrollY <
+        window.innerHeight * .55
+    );
+
+}
+
+
+/* =========================================================
+   CAROUSEL MOVEMENT
+========================================================= */
+
+function moveCarousel(direction) {
+
+    if (
+        !homeCarouselIsActive()
+    ) {
+        return false;
+    }
+
+
+    if (direction === "next") {
+
+        selectNextGame?.();
+
+    }
+
+    else {
+
+        selectPreviousGame?.();
+
+    }
+
+
+    window.setTimeout(
+        () => {
+
+            const selected =
+                getSelectedCard?.() ||
+                document.querySelector(
+                    ".game-card.selected"
+                );
+
+
+            if (selected) {
+
+                setFocusTarget(
+                    selected,
+                    {
+                        track: true,
+                        duration: 850
+                    }
+                );
+
+            }
+
+        },
+        20
+    );
+
+
+    return true;
+
+}
+
+
+/* =========================================================
+   ENTER / ACTIVATE
+========================================================= */
+
+function activateCurrentTarget() {
+
+    const active =
+        document.activeElement;
+
+
+    /*
+       Native button/link activation.
+    */
+
+    if (
+        active &&
+        active !== document.body &&
+        (
+            active.matches?.(
+                "button, a, [role='button']"
+            )
+        )
+    ) {
+
+        active.click();
+
+        return;
+
+    }
+
+
+    /*
+       HOME fallback:
+       trigger the main action for the selected game.
+    */
+
+    if (
+        APXState.activePage ===
+        "home"
+    ) {
+
+        const primary =
+            document.getElementById(
+                "primaryAction"
+            );
+
+
+        if (
+            primary &&
+            !primary.disabled
+        ) {
+
+            primary.click();
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   QUICK APX AI
+========================================================= */
+
+function requestQuickAI() {
+
+    window.dispatchEvent(
+        new CustomEvent(
+            "apx:quickai"
+        )
+    );
+
+}
+
+
+/* =========================================================
+   KEYBOARD
+========================================================= */
+
+function handleKeyDown(event) {
+
+    const target =
+        event.target;
+
+
+    const typing =
+        isTypingTarget(
+            target
+        );
+
+
+    /*
+       ESCAPE
+    */
+
+    if (
+        event.key === "Escape"
+    ) {
+
+        event.preventDefault();
+
+
+        window.dispatchEvent(
+            new CustomEvent(
+                "apx:back"
+            )
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+       Never hijack normal typing controls.
+    */
+
+    if (typing) {
+        return;
+    }
+
+
+    setInputMode?.(
+        "keyboard"
+    );
+
+
+    /*
+       QUICK AI
+
+       A = Quick APX AI when not typing and when the
+       dedicated APX AI page is not already open.
+    */
+
+    if (
+        event.key.toLowerCase() ===
+        "a" &&
+        APXState.activePage !==
+        "apx-ai"
+    ) {
+
+        event.preventDefault();
+
+        requestQuickAI();
+
+        return;
+
+    }
+
+
+    /*
+       HOME CAROUSEL
+    */
+
+    if (
+        event.key ===
+        "ArrowRight"
+    ) {
+
+        if (
+            moveCarousel(
+                "next"
+            )
+        ) {
+
+            event.preventDefault();
+
+        }
+
+
+        return;
+
+    }
+
+
+    if (
+        event.key ===
+        "ArrowLeft"
+    ) {
+
+        if (
+            moveCarousel(
+                "previous"
+            )
+        ) {
+
+            event.preventDefault();
+
+        }
+
+
+        return;
+
+    }
+
+
+    /*
+       ENTER
+    */
+
+    if (
+        event.key === "Enter"
+    ) {
+
+        event.preventDefault();
+
+        activateCurrentTarget();
+
+    }
+
+}
+
+
+/* =========================================================
+   POINTER MODE
+========================================================= */
+
+function handlePointerDown() {
+
+    setInputMode?.(
+        "pointer"
+    );
+
+}
+
+
+/* =========================================================
+   STORE -> HOME
+
+   store.js dispatches apx:storegame.
+
+   navigation.js handles the page change + carousel
+   selection. app.js then synchronizes the selected UI.
+
+========================================================= */
+
+function handleStoreGame(event) {
+
+    const detail =
+        event.detail ||
+        {};
+
+
+    const gameId =
+        typeof detail === "string"
+            ? detail
+            : (
+                detail.gameId ||
+                detail.id ||
+                detail.game?.id
+            );
+
+
+    if (!gameId) {
+        return;
+    }
+
+
+    /*
+       Select before showing Home so the carousel is already
+       aimed at the correct title when Home becomes visible.
+    */
+
+    selectGameById?.(
+        gameId
+    );
+
+
+    navigateToPage(
+        "home",
+        {
+            source:
+                "store-game"
+        }
+    );
+
+
+    window.setTimeout(
+        () => {
+
+            const selected =
+                getSelectedCard?.() ||
+                document.querySelector(
+                    ".game-card.selected"
+                );
+
+
+            if (selected) {
+
+                setFocusTarget(
+                    selected,
+                    {
+                        track: true,
+                        duration: 850
+                    }
+                );
+
+            }
+
+        },
+        100
+    );
+
+}
+
+
+/* =========================================================
+   FOCUS TRACKING
+========================================================= */
+
+function handleFocusIn(event) {
+
+    const target =
+        event.target?.closest?.(
+            "[data-apx-focus]"
+        );
+
+
+    if (!target) {
+        return;
+    }
+
+
+    setFocusTarget(
+        target,
+        {
+            track: true,
+            duration: 500
+        }
+    );
+
+}
+
+
+/* =========================================================
+   POINTER HOVER
+========================================================= */
+
+function handlePointerOver(event) {
+
+    const target =
+        event.target?.closest?.(
+            "[data-apx-focus]"
+        );
+
+
+    if (!target) {
+        return;
+    }
+
+
+    if (
+        target.closest(
+            "[hidden]"
+        )
+    ) {
+        return;
+    }
+
+
+    setFocusTarget(
+        target,
+        {
+            track: true,
+            duration: 500
+        }
+    );
+
+}
+
+
+/* =========================================================
+   RESIZE / SCROLL
+========================================================= */
+
+function handleViewportChange() {
+
+    refreshFocus?.();
+
+}
+
+
+/* =========================================================
+   BIND NAV BUTTONS
+========================================================= */
+
+function bindNavigationButtons() {
+
+    getPageButtons().forEach(
+        button => {
+
+            /*
+               Prevent accidental duplicate listeners if
+               initNavigation() is ever called again.
+            */
+
+            if (
+                button.dataset
+                    .apxNavigationBound ===
+                "true"
+            ) {
+                return;
+            }
+
+
+            button.dataset.apxNavigationBound =
+                "true";
+
+
+            button.addEventListener(
+                "click",
+                handleNavClick
+            );
 
         }
     );
@@ -707,25 +927,70 @@ function handlePageFocus(
 
 
 /* =========================================================
-   SCROLL
+   INITIAL PAGE
 ========================================================= */
 
-function handleScroll() {
+function initializePageState() {
 
-    refreshFocus();
+    let page =
+        normalizePage(
+            APXState.activePage
+        );
+
+
+    if (
+        !VALID_PAGES.includes(
+            page
+        )
+    ) {
+
+        page =
+            "home";
+
+    }
+
+
+    setActivePage(
+        page
+    );
+
+
+    updatePageUI(
+        page
+    );
 
 }
 
 
 /* =========================================================
-   BIND NAVIGATION
+   INITIALIZE
 ========================================================= */
 
-function bindNavigationEvents() {
+export function initNavigation() {
+
+    if (initialized) {
+
+        bindNavigationButtons();
+
+        initializePageState();
+
+        refreshFocus?.();
+
+        return;
+
+    }
+
+
+    initialized =
+        true;
+
+
+    bindNavigationButtons();
+
 
     document.addEventListener(
         "keydown",
-        handleKeyboard
+        handleKeyDown
     );
 
 
@@ -739,8 +1004,35 @@ function bindNavigationEvents() {
 
 
     document.addEventListener(
-        "click",
-        handleNavigationClick
+        "focusin",
+        handleFocusIn
+    );
+
+
+    document.addEventListener(
+        "pointerover",
+        handlePointerOver,
+        {
+            passive: true
+        }
+    );
+
+
+    window.addEventListener(
+        "resize",
+        handleViewportChange,
+        {
+            passive: true
+        }
+    );
+
+
+    window.addEventListener(
+        "scroll",
+        handleViewportChange,
+        {
+            passive: true
+        }
     );
 
 
@@ -750,39 +1042,47 @@ function bindNavigationEvents() {
     );
 
 
-    window.addEventListener(
-        "apx:pagechange",
-        handlePageFocus
-    );
+    initializePageState();
 
 
-    window.addEventListener(
-        "scroll",
-        handleScroll,
-        {
-            passive: true
-        }
+    console.log(
+        "[APX] v0.41 navigation ready."
     );
 
 }
 
 
 /* =========================================================
-   INITIALIZE
+   PUBLIC HELPERS
 ========================================================= */
 
-export function initNavigation() {
+export function getActivePage() {
 
-    bindNavigationEvents();
-
-
-    updateScreenVisibility();
-
-    updateNavigationUI();
-
-
-    console.log(
-        "[APX] Navigation ready."
+    return normalizePage(
+        APXState.activePage
     );
+
+}
+
+
+export function isOnPage(page) {
+
+    return (
+        normalizePage(
+            APXState.activePage
+        ) ===
+        normalizePage(page)
+    );
+
+}
+
+
+export function refreshNavigation() {
+
+    bindNavigationButtons();
+
+    initializePageState();
+
+    refreshFocus?.();
 
 }
