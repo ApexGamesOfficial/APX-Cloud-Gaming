@@ -1,26 +1,24 @@
-/*
-    APX Cloud Gaming
-    v0.4
+/* =========================================================
+   APX v0.41
+   GAME + SYSTEM CARD DATA
 
-    APX GAME / HOME CARD DATA
-*/
+   Home carousel order:
+   Welcome
+   APX ZERO
+   Apex Demo
+   Project Unknown
+   Future Game
 
-
-/*
-    IMPORTANT:
-
-    apxCompatible should ONLY become true for real games
-    once that game has actually been approved/tested for APX.
-
-    The current entries are UI prototypes.
-*/
-
+   IMPORTANT:
+   Being listed inside APX does NOT mean a game currently
+   supports real APX cloud streaming.
+========================================================= */
 
 export const APX_GAMES = [
 
-    /* ---------------------------------------
+    /* =====================================================
        WELCOME
-    --------------------------------------- */
+    ===================================================== */
 
     {
         id: "welcome",
@@ -28,33 +26,69 @@ export const APX_GAMES = [
         type: "welcome",
 
         title: "Welcome",
-        shortTitle: "Welcome",
+
+        artTitle: "WELCOME",
 
         developer: "APX",
+
+        genre: "System",
 
         description:
             "Your games, friends, captures, downloads and cloud activity — all in one place.",
 
-        cardImage: "",
-        backgroundImage: "",
-
-        accent: "welcome",
-
-        playable: false,
-        apxCompatible: false,
-
         status: "System",
 
-        tags: [
-            "APX",
-            "Home"
-        ]
+        playable: false,
+
+        apxCompatible: false,
+
+        cardImage: "",
+
+        backgroundImage: "",
+
+        accent: "blue"
     },
 
 
-    /* ---------------------------------------
+    /* =====================================================
+       APX ZERO
+       Subscription / membership card.
+       This is NOT a game.
+    ===================================================== */
+
+    {
+        id: "apx-zero",
+
+        type: "subscription",
+
+        title: "APX ZERO",
+
+        artTitle: "ZERO",
+
+        developer: "APX",
+
+        genre: "Membership",
+
+        description:
+            "Go further with APX. Explore the upcoming APX ZERO membership experience.",
+
+        status: "Membership",
+
+        playable: false,
+
+        apxCompatible: false,
+
+        cardImage: "",
+
+        backgroundImage: "",
+
+        accent: "zero"
+    },
+
+
+    /* =====================================================
        APEX DEMO
-    --------------------------------------- */
+    ===================================================== */
 
     {
         id: "apex-demo",
@@ -62,46 +96,38 @@ export const APX_GAMES = [
         type: "game",
 
         title: "Apex Demo",
-        shortTitle: "Apex Demo",
+
+        artTitle: "APEX DEMO",
 
         developer: "Apex Games",
+
+        genre: "Action",
 
         description:
             "Enter the Apex Games ecosystem with the official demonstration experience.",
 
-        /*
-            We'll replace these with the real APX
-            artwork paths once the v0.4 visual
-            structure is installed.
-        */
-
-        cardImage: "",
-        backgroundImage: "",
-
-        accent: "blue",
+        status: "Prototype",
 
         playable: true,
 
         /*
-            Keep false until actual APX streaming
-            compatibility exists.
+           IMPORTANT:
+           The game existing does not mean APX cloud
+           streaming infrastructure is connected.
         */
-
         apxCompatible: false,
 
-        status: "Prototype",
+        cardImage: "",
 
-        tags: [
-            "Action",
-            "Singleplayer",
-            "Apex Games"
-        ]
+        backgroundImage: "",
+
+        accent: "blue"
     },
 
 
-    /* ---------------------------------------
+    /* =====================================================
        PROJECT UNKNOWN
-    --------------------------------------- */
+    ===================================================== */
 
     {
         id: "project-unknown",
@@ -109,34 +135,33 @@ export const APX_GAMES = [
         type: "game",
 
         title: "Project Unknown",
-        shortTitle: "Project Unknown",
+
+        artTitle: "PROJECT UNKNOWN",
 
         developer: "Apex Games",
+
+        genre: "Adventure",
 
         description:
             "An upcoming Apex Games adventure currently in development.",
 
-        cardImage: "",
-        backgroundImage: "",
-
-        accent: "deep-blue",
-
-        playable: false,
-        apxCompatible: false,
-
         status: "Coming Soon",
 
-        tags: [
-            "Adventure",
-            "Singleplayer",
-            "Coming Soon"
-        ]
+        playable: false,
+
+        apxCompatible: false,
+
+        cardImage: "",
+
+        backgroundImage: "",
+
+        accent: "dark"
     },
 
 
-    /* ---------------------------------------
-       FUTURE GAME PLACEHOLDER
-    --------------------------------------- */
+    /* =====================================================
+       FUTURE GAME
+    ===================================================== */
 
     {
         id: "future-game",
@@ -144,132 +169,299 @@ export const APX_GAMES = [
         type: "placeholder",
 
         title: "Future Game",
-        shortTitle: "Future Game",
 
-        developer: "Coming to APX",
+        artTitle: "COMING SOON",
+
+        developer: "Apex Games",
+
+        genre: "Coming Soon",
 
         description:
             "More games will appear here as the APX catalog grows.",
 
-        cardImage: "",
-        backgroundImage: "",
-
-        accent: "dark",
+        status: "Coming Soon",
 
         playable: false,
+
         apxCompatible: false,
 
-        status: "Placeholder",
+        cardImage: "",
 
-        tags: [
-            "Coming Soon"
-        ]
+        backgroundImage: "",
+
+        accent: "blue"
     }
 
 ];
 
 
-/* ---------------------------------------
-   GAME HELPERS
---------------------------------------- */
+/* =========================================================
+   BASIC LOOKUPS
+========================================================= */
 
 export function getGameById(id) {
-    return APX_GAMES.find(
-        game => game.id === id
-    ) || null;
-}
 
-
-export function getGameByIndex(index) {
-    return APX_GAMES[index] || null;
-}
-
-
-export function getGameIndex(id) {
-    return APX_GAMES.findIndex(
-        game => game.id === id
+    return (
+        APX_GAMES.find(
+            game =>
+                game.id === id
+        ) ||
+        null
     );
 }
 
 
-export function getWelcomeCard() {
-    return APX_GAMES.find(
-        game => game.type === "welcome"
-    ) || null;
+export function getGameByIndex(index) {
+
+    return (
+        APX_GAMES[index] ||
+        null
+    );
 }
 
 
+export function getGameIndex(id) {
+
+    return APX_GAMES.findIndex(
+        game =>
+            game.id === id
+    );
+}
+
+
+/* =========================================================
+   SYSTEM CARDS
+========================================================= */
+
+export function getWelcomeCard() {
+
+    return getGameById(
+        "welcome"
+    );
+}
+
+
+export function getAPXZeroCard() {
+
+    return getGameById(
+        "apx-zero"
+    );
+}
+
+
+/* =========================================================
+   GAME FILTERS
+========================================================= */
+
 export function getActualGames() {
+
     return APX_GAMES.filter(
-        game => game.type === "game"
+        item =>
+            item.type === "game"
     );
 }
 
 
 export function getAPXCompatibleGames() {
+
     return APX_GAMES.filter(
-        game =>
-            game.type === "game" &&
-            game.apxCompatible === true
+        item =>
+            item.type === "game" &&
+            item.apxCompatible === true
     );
 }
 
 
 export function getPlayableGames() {
+
     return APX_GAMES.filter(
-        game =>
-            game.type === "game" &&
-            game.playable === true
+        item =>
+            item.type === "game" &&
+            item.playable === true
     );
 }
 
 
-/* ---------------------------------------
-   SELECTION HELPERS
---------------------------------------- */
+/* =========================================================
+   STORE CATALOG
+
+   For v0.41 this uses real game entries already known to
+   the APX prototype.
+
+   Welcome, ZERO, and placeholder cards do not become
+   Store games.
+========================================================= */
+
+export function getStoreGames() {
+
+    return APX_GAMES.filter(
+        item =>
+            item.type === "game"
+    );
+}
+
+
+/* =========================================================
+   INDEX NORMALIZATION
+========================================================= */
 
 export function normalizeGameIndex(index) {
 
-    const total = APX_GAMES.length;
+    const length =
+        APX_GAMES.length;
 
-    if (!total) {
+    if (!length) {
         return 0;
     }
 
     return (
-        (index % total) + total
-    ) % total;
+        (
+            index % length
+        ) +
+        length
+    ) % length;
 }
 
 
-export function getNextGameIndex(currentIndex) {
+export function getNextGameIndex(index) {
+
     return normalizeGameIndex(
-        currentIndex + 1
+        index + 1
     );
 }
 
 
-export function getPreviousGameIndex(currentIndex) {
+export function getPreviousGameIndex(index) {
+
     return normalizeGameIndex(
-        currentIndex - 1
+        index - 1
     );
 }
 
 
-/* ---------------------------------------
-   TYPE HELPERS
---------------------------------------- */
+/* =========================================================
+   TYPE CHECKS
+========================================================= */
 
 export function isWelcomeCard(item) {
-    return item?.type === "welcome";
+
+    return Boolean(
+        item &&
+        (
+            item.id === "welcome" ||
+            item.type === "welcome"
+        )
+    );
+}
+
+
+export function isAPXZero(item) {
+
+    return Boolean(
+        item &&
+        (
+            item.id === "apx-zero" ||
+            item.type === "subscription"
+        )
+    );
 }
 
 
 export function isGame(item) {
-    return item?.type === "game";
+
+    return Boolean(
+        item &&
+        item.type === "game"
+    );
 }
 
 
 export function isPlaceholder(item) {
-    return item?.type === "placeholder";
+
+    return Boolean(
+        item &&
+        item.type === "placeholder"
+    );
+}
+
+
+export function isSystemCard(item) {
+
+    return Boolean(
+        item &&
+        (
+            isWelcomeCard(item) ||
+            isAPXZero(item)
+        )
+    );
+}
+
+
+/* =========================================================
+   APX COMPATIBILITY
+
+   Keep this separate from playable status.
+
+   playable:
+   The title itself can be used/played in some context.
+
+   apxCompatible:
+   APX cloud streaming support is actually enabled.
+
+   Right now no title should falsely claim that real cloud
+   streaming infrastructure exists.
+========================================================= */
+
+export function canStreamOnAPX(item) {
+
+    return Boolean(
+        item &&
+        item.type === "game" &&
+        item.apxCompatible === true
+    );
+}
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+export function searchAPXGames(query) {
+
+    const normalized =
+        String(
+            query || ""
+        )
+            .trim()
+            .toLowerCase();
+
+    if (!normalized) {
+
+        return getActualGames();
+
+    }
+
+
+    return getActualGames().filter(
+        game => {
+
+            const searchable =
+                [
+                    game.title,
+                    game.developer,
+                    game.genre,
+                    game.description,
+                    game.status
+                ]
+                    .filter(Boolean)
+                    .join(" ")
+                    .toLowerCase();
+
+
+            return searchable.includes(
+                normalized
+            );
+
+        }
+    );
 }
