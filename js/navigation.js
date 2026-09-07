@@ -35,7 +35,7 @@ import {
 
 import {
     setFocusTarget,
-    refreshFocus
+    refreshFocusFrame
 } from "./focus.js";
 
 
